@@ -76,6 +76,12 @@ if ($Version -lt '1903')
 
 Write-Host "Downloading Microsoft.AzureStack.ReadinessChecker Package"
 Save-Package -ProviderName NuGet -Source https://www.powershellgallery.com/api/v2 -Name Microsoft.AzureStack.ReadinessChecker -Path $Path -Force
+
+Write-Host "Downloading PowerShellGet Package"
+Save-Package -ProviderName NuGet -Source https://www.powershellgallery.com/api/v2 -Name PowerShellGet -Path $Path -Force
+
+Write-Host "Downloading NuGet Package"
+Save-Package -ProviderName NuGet -Source https://www.powershellgallery.com/api/v2 -Name NuGet -Path $Path -Force
 #endregion
 
 #region Download, Install and Import AzureStack-Tools Module

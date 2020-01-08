@@ -23,10 +23,10 @@ Param
     [Int]$Version
 )
 
-# requires -Version 5
-# requires -RunAsAdministrator
-# requires -Module PowerShellGet
-# requires -Module PackageManagement
+#Requires -Version 5
+#Requires -RunAsAdministrator
+#Requires -Module PowerShellGet
+#Requires -Module PackageManagement
 
 $VerbosePreference = 'Continue'
 
@@ -129,8 +129,10 @@ if ($Version -lt '1903')
     Write-Host "Installing AzureStack Module"
     Install-Module -Name AzureStack -RequiredVersion 1.7.1  -Force
 }
-#endregion
 
+Write-Host "Installing Microsoft.AzureStack.ReadinessChecker Module"
+Install-Module Microsoft.AzureStack.ReadinessChecker -Force
+#endregion
 
 #region Download, Install and Import AzureStack-Tools Module
 Write-Host "Installing Azure Stack Tools Master"

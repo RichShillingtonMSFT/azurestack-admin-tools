@@ -1,9 +1,9 @@
 ﻿<#
 .SYNOPSIS
-    Script to get Azure Stack Update Progess
+    Script to get Azure Stack Startup Progess
 
 .DESCRIPTION
-    Use this to get Azure Stack Update Progess and display it in a readable window from Privileged Endpoint without entering the CloudAdmin User Password.
+    Use this to get Azure Stack Startup Progess from Privileged Endpoint without entering the CloudAdmin User Password.
     The Password is retrieved from a Key Vault Secret.
     The script will prompt you to login in with your Azure Stack Operator Credentials.
     You must then select the Subscription where the Admin Key Vault is stored.
@@ -26,7 +26,7 @@
     Example: @('10.0.0.1','10.0.0.2','10.0.0.3')
 
 .EXAMPLE
-    .\Get-AzureStackUpdateProgress.ps1
+    .\Get-AzureStackStartupProgress.ps1
 #>
 [CmdletBinding()]
 Param
@@ -96,6 +96,6 @@ catch
 
 $Session = New-PSSession -ComputerName (Get-Random -InputObject $PrivilegedEndpoints) -ConfigurationName PrivilegedEndpoint -Credential $CloudAdminCredential
 
-[XML]$Status = Invoke-Command $Session {Get-AzureStackUpdateStatus}
+[xml]$Status = (Invoke-Command $Session {Get-ActionStatus Start-AzureStack}).ProgressAsXml
 
-$Status.SelectNodes("//Step[@Status='InProgress']") | Out-GridView
+$Status.Action.Steps.Step | Select-Object Name,Description,Status

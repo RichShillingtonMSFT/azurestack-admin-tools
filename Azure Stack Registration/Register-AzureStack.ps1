@@ -33,7 +33,7 @@ Param
     [String]$CloudAdminUserName = 'CloudAdmin@azurestack.local',
 
     # Define list of Privileged Endpoints as an Array.
-    # Example: @("10.0.0.1","10.0.0.2","10.0.0.3")
+    # Example: @("AZS-ERCS01","AZS-ERCS02","AZS-ERCS03")
     [parameter(Mandatory=$false,HelpMessage='Define list of Privileged Endpoints as an Array. Example: @("AZS-ERCS01","AZS-ERCS02","AZS-ERCS03")')]
     [Array]$PrivilegedEndpoints = @("AZS-ERCS01","AZS-ERCS02","AZS-ERCS03"),
 
@@ -44,7 +44,7 @@ Param
 
     # Billing Model for the Azure Stack. 
     # Example: 'Capacity','Custom','Development','PayAsYouUse'
-    [parameter(Mandatory=$true,HelpMessage='Registration Name for the Azure Stack. Example: Capacity')]
+    [parameter(Mandatory=$true,HelpMessage='Billing Model for the Azure Stack. Example: Capacity')]
     [ValidateSet('Capacity','Custom','Development','PayAsYouUse')]
     [String]$BillingModel
 )

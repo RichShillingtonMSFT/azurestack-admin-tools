@@ -70,7 +70,7 @@ $Plan = New-AzsPlan -Name 'Standard_IaaS_Plan' -ResourceGroupName 'OfferAndPlans
 #endregion
 
 #region Offer
-$Offer = New-AzsOffer -Name 'Standard_IaaS_Offer' -DisplayName 'Standard IaaS Offer' `
+New-AzsOffer -Name 'Standard_IaaS_Offer' -DisplayName 'Standard IaaS Offer' `
     -ResourceGroupName 'OfferAndPlans-RG' -BasePlanIds $Plan.Id `
     -Description 'Standard IaaS Offer' -State 'Private' -Location $Location.Location
 #endregion

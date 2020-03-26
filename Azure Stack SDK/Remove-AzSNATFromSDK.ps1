@@ -19,6 +19,14 @@
     AzureStackCertificateAuthority.cer
     AzureStackSelfSignedRootCert.cer
 
+    Finally you need to add DNS conditional forwarders to resolve Azure Stack zones.
+    DNS forwarding for azurestack.local to 192.168.200.224
+    DNS forwarding for internal.azurestack.local to 192.168.200.224
+    DNS forwarding for local.azurestack.external to 192.168.200.224
+    DNS forwarding for local.cloudapp.azurestack.external 192.168.200.224 (after installing WebApps)
+
+    Or set the DNS on your client to point to 192.168.200.224
+
 .EXAMPLE
     .\Remove-AzSNATFromSDK.ps1
 #>

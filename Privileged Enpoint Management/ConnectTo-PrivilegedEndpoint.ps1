@@ -26,7 +26,7 @@
     Example: @('10.0.0.1','10.0.0.2','10.0.0.3')
 
 .EXAMPLE
-    .\Connect-ToPrivilegedEndpoint.ps1
+    .\ConnectTo-PrivilegedEndpoint.ps1
 #>
 [CmdletBinding()]
 Param

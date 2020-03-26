@@ -96,42 +96,56 @@ If ($Version -ge '1910')
 {
     # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
     Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
-    Install-Module -Name AzureRM.BootStrapper -Force
+    Install-Module -Name AzureRM.BootStrapper -Force -Verbose
 
     # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
     Write-Host "Installing and importing the API Version Profile required by Azure Stack"
-    Use-AzureRmProfile -Profile 2019-03-01-hybrid -Force
+    Use-AzureRmProfile -Profile 2019-03-01-hybrid -Force -Verbose
+
+    $LoadedAzureModules = Get-Module | Where-Object {$_.Name -like "Azure*"}
+    foreach ($LoadedAzureModule in $LoadedAzureModules)
+    {
+        Write-Host "Removing module $($LoadedAzureModule.Name) from memory"
+        Remove-Module $LoadedAzureModule.Name -Force -Verbose
+    }
 
     Write-Host "Installing AzureStack Module"
-    Install-Module -Name AzureStack -RequiredVersion 1.8.0 -Force
+    Install-Module -Name AzureStack -RequiredVersion 1.8.0 -Force -WarningAction SilentlyContinue -Verbose
 }
 
 if (($Version -gt '1903') -and ($Version -le '1908'))
 {
     # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
     Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
-    Install-Module -Name AzureRM.BootStrapper
+    Install-Module -Name AzureRM.BootStrapper -Verbose
 
     # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
     Write-Host "Installing and importing the API Version Profile required by Azure Stack"
-    Use-AzureRmProfile -Profile 2019-03-01-hybrid -Force
+    Use-AzureRmProfile -Profile 2019-03-01-hybrid -Force -Verbose
+
+    $LoadedAzureModules = Get-Module | Where-Object {$_.Name -like "Azure*"}
+    foreach ($LoadedAzureModule in $LoadedAzureModules)
+    {
+        Write-Host "Removing module $($LoadedAzureModule.Name) from memory"
+        Remove-Module $LoadedAzureModule.Name -Force -Verbose
+    }
 
     Write-Host "Installing AzureStack Module"
-    Install-Module -Name AzureStack -RequiredVersion 1.7.2 -Force
+    Install-Module -Name AzureStack -RequiredVersion 1.7.2 -Force -WarningAction SilentlyContinue -Verbose
 }
 
 if ($Version -lt '1903')
 {
     # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
     Write-Host "Installing AzureRM Module"
-    Install-Module -Name AzureRM -RequiredVersion 2.4.0  -Force
+    Install-Module -Name AzureRM -RequiredVersion 2.4.0 -Force -Verbose
 
     Write-Host "Installing AzureStack Module"
-    Install-Module -Name AzureStack -RequiredVersion 1.7.1  -Force
+    Install-Module -Name AzureStack -RequiredVersion 1.7.1 -Force -WarningAction SilentlyContinue -Verbose
 }
 
 Write-Host "Installing Microsoft.AzureStack.ReadinessChecker Module"
-Install-Module Microsoft.AzureStack.ReadinessChecker -Force
+Install-Module Microsoft.AzureStack.ReadinessChecker -Force -WarningAction SilentlyContinue -Verbose
 #endregion
 
 #region Download, Install and Import AzureStack-Tools Module

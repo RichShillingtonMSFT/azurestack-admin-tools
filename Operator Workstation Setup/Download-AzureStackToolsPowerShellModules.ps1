@@ -47,7 +47,7 @@ Import-Module -Name PowerShellGet -ErrorAction Stop
 Import-Module -Name PackageManagement -ErrorAction Stop
 
 #region Download Require Azure Modules
-If ($Version -eq '1910')
+If ($Version -ge '1910')
 {
     Write-Host "Downloading AzureRM Package"
     Save-Package -ProviderName NuGet -Source https://www.powershellgallery.com/api/v2 -Name AzureRM -Path $Path -Force -RequiredVersion 2.5.0

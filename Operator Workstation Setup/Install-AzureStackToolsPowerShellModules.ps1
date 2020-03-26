@@ -92,7 +92,7 @@ else
 #endregion
 
 #region Install Require Azure Modules
-If ($Version -eq '1910')
+If ($Version -ge '1910')
 {
     # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
     Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"

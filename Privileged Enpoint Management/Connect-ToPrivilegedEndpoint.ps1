@@ -95,4 +95,4 @@ catch
 }
 
 $Session = New-PSSession -ComputerName (Get-Random -InputObject $PrivilegedEndpoints) -ConfigurationName PrivilegedEndpoint -Credential $CloudAdminCredential
-Enter-PSSession
+Enter-PSSession $Session

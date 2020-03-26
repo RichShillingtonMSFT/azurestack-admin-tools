@@ -40,8 +40,7 @@ $Environment = $Environments | Out-GridView -Title "Please Select an Azure Envio
 #region Connect to Azure
 try
 {
-    #$AzureRMAccount = Connect-AzureRmAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
-    $AzureRMAccount = Add-AzureRmAccount -EnvironmentName $($Environment.Name) -ErrorAction 'Stop'
+    Add-AzureRmAccount -EnvironmentName $($Environment.Name) -ErrorAction 'Stop'
 }
 catch
 {
@@ -56,11 +55,9 @@ try
     {
         $Subscription = $Subscriptions | Out-GridView -Title "Please Select a Subscription." -PassThru
         Select-AzureRmSubscription $Subscription
-        $SubscriptionID = $Subscription.SubscriptionID
     }
     else
     {
-        $SubscriptionID = $Subscriptions.SubscriptionID
         Select-AzureRmSubscription $Subscriptions
     }
 

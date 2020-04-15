@@ -110,7 +110,7 @@ If ($Version -ge '1910')
     }
 
     Write-Host "Installing AzureStack Module"
-    Install-Module -Name AzureStack -RequiredVersion 1.8.0 -Force -WarningAction SilentlyContinue -Verbose
+    Install-Module -Name AzureStack -RequiredVersion 1.8.1 -Force -WarningAction SilentlyContinue -Verbose
 }
 
 if (($Version -gt '1903') -and ($Version -le '1908'))

@@ -92,7 +92,7 @@ else
 #endregion
 
 #region Install Require Azure Modules
-If ($Version -ge '1910')
+If ($Version -ge '2002')
 {
     # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
     Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
@@ -111,6 +111,27 @@ If ($Version -ge '1910')
 
     Write-Host "Installing AzureStack Module"
     Install-Module -Name AzureStack -RequiredVersion 1.8.1 -Force -WarningAction SilentlyContinue -Verbose
+}
+
+If ($Version -eq '1910')
+{
+    # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
+    Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
+    Install-Module -Name AzureRM.BootStrapper -Force -Verbose
+
+    # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
+    Write-Host "Installing and importing the API Version Profile required by Azure Stack"
+    Use-AzureRmProfile -Profile 2019-03-01-hybrid -Force -Verbose
+
+    $LoadedAzureModules = Get-Module | Where-Object {$_.Name -like "Azure*"}
+    foreach ($LoadedAzureModule in $LoadedAzureModules)
+    {
+        Write-Host "Removing module $($LoadedAzureModule.Name) from memory"
+        Remove-Module $LoadedAzureModule.Name -Force -Verbose
+    }
+
+    Write-Host "Installing AzureStack Module"
+    Install-Module -Name AzureStack -RequiredVersion 1.8.0 -Force -WarningAction SilentlyContinue -Verbose
 }
 
 if (($Version -gt '1903') -and ($Version -le '1908'))

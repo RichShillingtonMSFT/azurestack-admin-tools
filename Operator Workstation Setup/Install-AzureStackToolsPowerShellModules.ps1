@@ -12,6 +12,7 @@
 
 .EXAMPLE
     .\Install-AzureStackToolsPowerShellModules.ps1 -Version '1910'
+    or
     .\Install-AzureStackToolsPowerShellModules.ps1 -Version '2002' -AzModules
 #>
 [CmdletBinding()]

@@ -12,6 +12,7 @@
 
 .EXAMPLE
     .\Install-AzureStackToolsPowerShellModules.ps1 -Version '1910'
+    .\Install-AzureStackToolsPowerShellModules.ps1 -Version '2002' -AzModules
 #>
 [CmdletBinding()]
 Param
@@ -20,8 +21,17 @@ Param
     # Example: '1910'
     [parameter(Mandatory=$true,HelpMessage='Provide the version of Azure Stack you are using. Example: 1910')]
     [ValidatePattern('^\d{4}$')]
-    [Int]$Version
+    [Int]$Version,
+
+    # Switch to install Az Pre-release Modules
+    [Switch]$AzModules
 )
+
+if (($Version -lt '2002') -and ($AzModules -eq $true))
+{
+    Write-Warning "You must have version 2002 with the latest hotfix installed prior to using AzModules"
+    break
+}
 
 #Requires -Version 5
 #Requires -RunAsAdministrator
@@ -34,7 +44,7 @@ $VerbosePreference = 'Continue'
 Write-Output "Checking for existing Azure Modules"
 try
 {
-    $ModuleTest = Get-Module -ListAvailable | Where-Object {($_.Name -like "Az.*") -or ($_.Name -like "Azure.*") -or ($_.Name -like "AzureRM.*") -or ($_.Name -like "Azs.*")}
+    $ModuleTest = Get-Module -ListAvailable | Where-Object {($_.Name -like "Az.*") -or ($_.Name -like "Azure*") -or ($_.Name -like "Azs.*")}
     if ($ModuleTest)
     {
         Write-Warning "Found Azure Modules"
@@ -92,7 +102,7 @@ else
 #endregion
 
 #region Install Require Azure Modules
-If ($Version -ge '2002')
+If (($Version -ge '2002') -and ($AzModules -eq $false))
 {
     # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
     Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
@@ -111,6 +121,27 @@ If ($Version -ge '2002')
 
     Write-Host "Installing AzureStack Module"
     Install-Module -Name AzureStack -RequiredVersion 1.8.1 -Force -WarningAction SilentlyContinue -Verbose
+}
+
+If (($Version -ge '2002') -and ($AzModules -eq $true))
+{
+    # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
+    Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
+    Install-Module -Name Az.BootStrapper -AllowPrerelease -Force -Verbose
+
+    # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
+    Write-Host "Installing and importing the API Version Profile required by Azure Stack"
+    Use-AzProfile -Profile 2019-03-01-hybrid -Force -Verbose
+
+    $LoadedAzureModules = Get-Module | Where-Object {$_.Name -like "Azure*"}
+    foreach ($LoadedAzureModule in $LoadedAzureModules)
+    {
+        Write-Host "Removing module $($LoadedAzureModule.Name) from memory"
+        Remove-Module $LoadedAzureModule.Name -Force -Verbose
+    }
+
+    Write-Host "Installing AzureStack Module"
+    Install-Module -Name AzureStack -RequiredVersion 2.0.0-preview -AllowPrerelease -Force -WarningAction SilentlyContinue -Verbose
 }
 
 If ($Version -eq '1910')

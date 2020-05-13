@@ -70,6 +70,12 @@ catch
 }
 #endregion
 
+#region Location Selection
+$Locations = Get-AzureRmLocation
+$Location = ($Locations | Out-GridView -Title "Please Select a location." -PassThru).Location
+#endregion
+
+#region Find Modules & import them
 $InstalledLocations = @()
 $ModulePaths = $env:PSModulePath.Split(';')
 
@@ -93,7 +99,8 @@ else
 }
 
 Import-Module $AzureStackToolsMasterLocation\Registration\RegisterWithAzure.psm1 -Force -Verbose
+#endregion
 
 Set-AzsRegistration -PrivilegedEndpointCredential $CloudAdminCredential -PrivilegedEndpoint $PrivilegedEndpoint `
--RegistrationName $env:COMPUTERNAME -BillingModel Development `
--UsageReportingEnabled -MarketplaceSyndicationEnabled -AzureContext $AzContext -Verbose
+    -RegistrationName $env:COMPUTERNAME -BillingModel Development -ResourceGroupLocation $Location `
+    -UsageReportingEnabled -MarketplaceSyndicationEnabled -AzureContext $AzContext -Verbose

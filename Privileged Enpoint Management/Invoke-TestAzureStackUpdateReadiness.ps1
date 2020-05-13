@@ -34,7 +34,7 @@ Param
     # Provide the User Name of the Cloud Admin.
     # Example: 'CloudAdmin@azurestack.local'
     [parameter(Mandatory=$false,HelpMessage='Provide the User Name of the Cloud Admin.')]
-    [String]$CloudAdminUserName,
+    [String]$CloudAdminUserName = 'CloudAdmin@azurestack.local',
 
     # Provide the name of the Admin Key Vault where the CloudAdmin Credentials are stored.
     # Example: 'Admin-KeyVault'

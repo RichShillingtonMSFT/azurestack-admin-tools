@@ -53,37 +53,37 @@ if (!$ResourceGroup)
     New-AzureRMResourceGroup -Name $ResourceGroupName -Location $Location.Location
 }
 
-#region Standard IaaS Plan
+#region Maximum IaaS Plan
 
 #region Create Quota
-$ComputeQuota = New-AzsComputeQuota -Name 'Standard_IaaS_Compute_Quota' -AvailabilitySetCount '10' `
-    -CoresCount '25' -VMScaleSetCount '10' `
-    -VirtualMachineCount '12' -StandardManagedDiskAndSnapshotSize '2048' `
-    -PremiumManagedDiskAndSnapshotSize '2048' -Location $Location.Location
+$ComputeQuota = New-AzsComputeQuota -Name 'Maximum_IaaS_Compute_Quota' -AvailabilitySetCount '10' `
+    -CoresCount '2500' -VMScaleSetCount '1000' `
+    -VirtualMachineCount '1200' -StandardManagedDiskAndSnapshotSize '204800' `
+    -PremiumManagedDiskAndSnapshotSize '204800' -Location $Location.Location
 
-$NetworkQuota = New-AzsNetworkQuota -Name 'Standard_IaaS_Network_Quota' -MaxNicsPerSubscription '12' `
-    -MaxPublicIpsPerSubscription '24' -MaxVirtualNetworkGatewayConnectionsPerSubscription '0' `
-    -MaxVnetsPerSubscription '12' -MaxVirtualNetworkGatewaysPerSubscription '0' `
-    -MaxSecurityGroupsPerSubscription '24' -MaxLoadBalancersPerSubscription '12' `
+$NetworkQuota = New-AzsNetworkQuota -Name 'Maximum_IaaS_Network_Quota' -MaxNicsPerSubscription '1200' `
+    -MaxPublicIpsPerSubscription '2400' -MaxVirtualNetworkGatewayConnectionsPerSubscription '100' `
+    -MaxVnetsPerSubscription '1200' -MaxVirtualNetworkGatewaysPerSubscription '1000' `
+    -MaxSecurityGroupsPerSubscription '2400' -MaxLoadBalancersPerSubscription '1200' `
     -Location $Location.Location
 
-$StorageQuota = New-AzsStorageQuota -Name 'Standard_IaaS_Storage_Quota' -CapacityInGb '500' `
-    -NumberOfStorageAccounts '25' -Location $Location.Location
+$StorageQuota = New-AzsStorageQuota -Name 'Maximum_IaaS_Storage_Quota' -CapacityInGb '50000' `
+    -NumberOfStorageAccounts '2500' -Location $Location.Location
 
 $KeyVaultQuota = Get-AzsKeyVaultQuota
 #endregion
 
 #region Plan
-$Plan = New-AzsPlan -Name 'Standard_IaaS_Plan' -ResourceGroupName $ResourceGroupName `
-    -DisplayName 'Standard IaaS Plan' -Description 'Standard IaaS Plan' `
+$Plan = New-AzsPlan -Name 'Maximum_IaaS_Plan' -ResourceGroupName $ResourceGroupName `
+    -DisplayName 'Maximum IaaS Plan' -Description 'Maximum IaaS Plan' `
     -QuotaIds "$($ComputeQuota.Id)","$($NetworkQuota.Id)","$($StorageQuota.Id)","$($KeyVaultQuota.Id)" `
     -Location $Location.Location
 #endregion
 
 #region Offer
-New-AzsOffer -Name 'Standard_IaaS_Offer' -DisplayName 'Standard IaaS Offer' `
+New-AzsOffer -Name 'Maximum_IaaS_Offer' -DisplayName 'Maximum IaaS Offer' `
     -ResourceGroupName $ResourceGroupName -BasePlanIds $Plan.Id `
-    -Description 'Standard IaaS Offer' -State 'Private' -Location $Location.Location
+    -Description 'Maximum IaaS Offer' -State 'Private' -Location $Location.Location
 #endregion
 
 #endregion

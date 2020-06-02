@@ -66,3 +66,21 @@ $ScaleUnitData.value
 $ScaleUnitData.value.Properties
 $ScaleUnitData.value.Properties.totalCapacity
 #endregion
+
+# Summarize
+function Get-AzureStackHealth ($SubscriptionID)
+{
+    $restUri = $($Environment.ResourceManagerUrl) + "/subscriptions/$SubscriptionID/resourcegroups/$ResourceGroupName/providers/Microsoft.InfrastructureInsights.Admin/regionHealths/local/serviceHealths?api-version=2016-05-01"
+    $AuthHeader = Invoke-CreateAuthHeader
+    $Response = Invoke-RestMethod -Uri $restUri -Method Get -Headers $AuthHeader
+    return $Response
+}
+
+$HealthReport = @()
+$Responses = Get-AzureStackHealth -SubscriptionID $($Subscription.ID)
+foreach ($Response in $Responses.value.Properties)
+{
+    $HealthReport += New-Object PSObject -Property ([ordered]@{Namespace=$($Response.displayName);HealthState=$($Response.healthState);CriticalAlertCount=$($Response.alertSummary.criticalAlertCount);WarningAlertCount=$($Response.alertSummary.warningAlertCount)})
+}
+
+$HealthReport

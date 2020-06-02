@@ -4,7 +4,11 @@ $CommandList = @()
 
 foreach ($Module in $Modules)
 {
-    $CommandList += (Get-Command -Module $Module.Name).Name
+    $Commands = Get-Command -Module $Module.Name
+    foreach ($Command in  $Commands)
+    {
+        $CommandList += New-Object PSObject -Property (@{Command=$($Command.Name);Module=$($Module.Name)})
+    }
 }
 
-$CommandList | Sort-Object
+$CommandList | Sort-Object -Property Command

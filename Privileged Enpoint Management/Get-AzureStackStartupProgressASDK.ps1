@@ -7,10 +7,10 @@
 
 .PARAMETER PrivilegedEndpoints
     Define list of Privileged Endpoints as an Array.
-    Example: @('10.0.0.1','10.0.0.2','10.0.0.3')
+    Example: @('AZS-ERCS01')
 
 .EXAMPLE
-    .\Get-AzureStackStartupProgress.ps1
+    .\Get-AzureStackStartupProgressASDK.ps1
 #>
 [CmdletBinding()]
 Param
@@ -18,8 +18,9 @@ Param
     # Define list of Privileged Endpoints as an Array.
     # Example: @("10.0.0.1","10.0.0.2","10.0.0.3")
     [parameter(Mandatory=$false,HelpMessage='Define list of Privileged Endpoints as an Array. Example: @("10.0.0.1","10.0.0.2","10.0.0.3")')]
-    [Array]$PrivilegedEndpoints = @("10.0.0.1","10.0.0.2","10.0.0.3")
+    [Array]$PrivilegedEndpoints = @('AZS-ERCS01')
 )
+
 
 $CloudAdminCredentials = (Get-Credential -Message "Enter your Cloud Admin credentials.")
 

@@ -16,7 +16,7 @@
 Param
 (
     # Define list of Privileged Endpoints as an Array.
-    # Example: @("10.0.0.1","10.0.0.2","10.0.0.3")
+    # Example: @('AZS-ERCS01')
     [parameter(Mandatory=$false,HelpMessage='Define list of Privileged Endpoints as an Array. Example: @("10.0.0.1","10.0.0.2","10.0.0.3")')]
     [Array]$PrivilegedEndpoints = @('AZS-ERCS01')
 )

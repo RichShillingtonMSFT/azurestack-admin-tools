@@ -122,6 +122,9 @@ If (($Version -ge '2002') -and ($AzModules -eq $false))
 
     Write-Host "Installing AzureStack Module"
     Install-Module -Name AzureStack -RequiredVersion 1.8.1 -Force -WarningAction SilentlyContinue -Verbose
+
+    Write-Host "Installing Azs.Syndication.Admin Module"
+    Install-Module -Name Azs.Syndication.Admin -RequiredVersion 0.1.140
 }
 
 If (($Version -ge '2002') -and ($AzModules -eq $true))
@@ -143,6 +146,9 @@ If (($Version -ge '2002') -and ($AzModules -eq $true))
 
     Write-Host "Installing AzureStack Module"
     Install-Module -Name AzureStack -RequiredVersion 2.0.0-preview -AllowPrerelease -Force -WarningAction SilentlyContinue -Verbose
+
+    Write-Host "Installing Azs.Syndication.Admin Module"
+    Install-Module -Name Azs.Syndication.Admin -RequiredVersion 0.1.140
 }
 
 If ($Version -eq '1910')
@@ -164,6 +170,9 @@ If ($Version -eq '1910')
 
     Write-Host "Installing AzureStack Module"
     Install-Module -Name AzureStack -RequiredVersion 1.8.0 -Force -WarningAction SilentlyContinue -Verbose
+
+    Write-Host "Installing Azs.Syndication.Admin Module"
+    Install-Module -Name Azs.Syndication.Admin -RequiredVersion 0.1.140
 }
 
 if (($Version -gt '1903') -and ($Version -le '1908'))

@@ -54,6 +54,9 @@ If ($Version -ge '2002')
 
     Write-Host "Downloading AzureStack Package"
     Save-Package -ProviderName NuGet -Source https://www.powershellgallery.com/api/v2 -Name AzureStack -Path $Path -Force -RequiredVersion 1.8.1
+
+    Write-Host "Downloading Azs.Syndication.Admin Module"
+    Save-Package -ProviderName NuGet -Source https://www.powershellgallery.com/api/v2 -Name  Azs.Syndication.Admin -Path $Path -Force -RequiredVersion 0.1.140
 }
 
 If ($Version -eq '1910')
@@ -63,6 +66,9 @@ If ($Version -eq '1910')
 
     Write-Host "Downloading AzureStack Package"
     Save-Package -ProviderName NuGet -Source https://www.powershellgallery.com/api/v2 -Name AzureStack -Path $Path -Force -RequiredVersion 1.8.0
+
+    Write-Host "Downloading Azs.Syndication.Admin Module"
+    Save-Package -ProviderName NuGet -Source https://www.powershellgallery.com/api/v2 -Name  Azs.Syndication.Admin -Path $Path -Force -RequiredVersion 0.1.140
 }
 
 if (($Version -gt '1903') -and ($Version -le '1908'))
@@ -72,6 +78,9 @@ if (($Version -gt '1903') -and ($Version -le '1908'))
 
     Write-Host "Downloading AzureStack Package"
     Save-Package -ProviderName NuGet -Source https://www.powershellgallery.com/api/v2 -Name AzureStack -Path $Path -Force -RequiredVersion 1.7.2
+
+    Write-Host "Downloading Azs.Syndication.Admin Module"
+    Save-Package -ProviderName NuGet -Source https://www.powershellgallery.com/api/v2 -Name  Azs.Syndication.Admin -Path $Path -Force -RequiredVersion 0.1.140
 }
 
 if ($Version -lt '1903')

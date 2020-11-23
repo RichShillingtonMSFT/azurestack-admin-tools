@@ -82,6 +82,11 @@ foreach ($ModulePath in $ModulePaths)
     {
         $InstalledLocations += ($ModulePath.TrimEnd('\') + "\AzureStack-Tools-master")
     }
+    $TestResults = Test-Path ($ModulePath.TrimEnd('\') + "\AzureStack-Tools-az")
+    if ($TestResults)
+    {
+        $InstalledLocations += ($ModulePath.TrimEnd('\') + "\AzureStack-Tools-az")
+    }
     $TestResults = Test-Path ($ModulePath.TrimEnd('\') + "\AzureStack")
     if ($TestResults)
     {
@@ -121,7 +126,7 @@ If (($Version -ge '2002') -and ($AzModules -eq $false))
     }
 
     Write-Host "Installing AzureStack Module"
-    Install-Module -Name AzureStack -RequiredVersion 1.8.1 -Force -WarningAction SilentlyContinue -Verbose
+    Install-Module -Name AzureStack -RequiredVersion 1.8.2 -Force -WarningAction SilentlyContinue -Verbose
 
     Write-Host "Installing Azs.Syndication.Admin Module"
     Install-Module -Name Azs.Syndication.Admin -RequiredVersion 0.1.140
@@ -129,6 +134,9 @@ If (($Version -ge '2002') -and ($AzModules -eq $false))
 
 If (($Version -ge '2002') -and ($AzModules -eq $true))
 {
+    # Set TLS Protocol 1.2
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    
     # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
     Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
     Install-Module -Name Az.BootStrapper -AllowPrerelease -Force -Verbose
@@ -145,7 +153,7 @@ If (($Version -ge '2002') -and ($AzModules -eq $true))
     }
 
     Write-Host "Installing AzureStack Module"
-    Install-Module -Name AzureStack -RequiredVersion 2.0.0-preview -AllowPrerelease -Force -WarningAction SilentlyContinue -Verbose
+    Install-Module -Name AzureStack -RequiredVersion '2.0.2-preview' -AllowPrerelease -Force -WarningAction SilentlyContinue -Verbose
 
     Write-Host "Installing Azs.Syndication.Admin Module"
     Install-Module -Name Azs.Syndication.Admin -RequiredVersion 0.1.140
@@ -213,9 +221,19 @@ Install-Module Microsoft.AzureStack.ReadinessChecker -Force -WarningAction Silen
 #region Download, Install and Import AzureStack-Tools Module
 Write-Host "Installing Azure Stack Tools Master"
 Set-Location 'C:\Program Files\WindowsPowerShell\Modules'
-Invoke-WebRequest 'https://github.com/Azure/AzureStack-Tools/archive/master.zip' -OutFile 'master.zip' -UseBasicParsing
-Expand-Archive 'master.zip' -DestinationPath 'C:\Program Files\WindowsPowerShell\Modules' -Force
-Remove-Item 'master.zip'
+if (($Version -ge '2002') -and ($AzModules -eq $true))
+{
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 
+    invoke-webrequest https://github.com/Azure/AzureStack-Tools/archive/az.zip -OutFile az.zip
+    Expand-Archive 'az.zip' -DestinationPath 'C:\Program Files\WindowsPowerShell\Modules' -Force
+    Remove-Item 'az.zip'
+}
+else 
+{
+    Invoke-WebRequest 'https://github.com/Azure/AzureStack-Tools/archive/master.zip' -OutFile 'master.zip' -UseBasicParsing
+    Expand-Archive 'master.zip' -DestinationPath 'C:\Program Files\WindowsPowerShell\Modules' -Force
+    Remove-Item 'master.zip'
+}
 #endregion
 
 Write-Host "Setup Complete" -ForegroundColor Green

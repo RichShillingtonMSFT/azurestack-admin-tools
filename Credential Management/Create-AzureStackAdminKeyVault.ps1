@@ -59,8 +59,12 @@ catch
 
 try 
 {
-    $Subscription = Get-AzureRmSubscription -SubscriptionName 'Default Provider Subscription'
-    Select-AzureRmSubscription $Subscription
+    $Subscriptions = Get-AzureRmSubscription
+    if ($Subscriptions.Count -gt '1')
+    {
+        $Subscription = $Subscriptions | Out-GridView -Title "Please Select the Subscription where the Admin Key Vault will be created." -PassThru
+        Select-AzureRmSubscription $Subscription
+    }
 }
 catch
 {

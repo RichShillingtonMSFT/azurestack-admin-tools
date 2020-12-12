@@ -19,12 +19,12 @@
     Provide the Secret Name as it appears in the Admin Key Vault.
     Example: 'CloudAdminCredential'
 
-.PARAMETER PrivilegedEndpoint
-    Provide the Privileged Endpoint Name or IP.
-    Example: 'AZS-ERCS01'
+.PARAMETER PrivilegedEndpoints
+    Define list of Privileged Endpoints as an Array.
+    Example: @('10.0.0.1','10.0.0.2','10.0.0.3')
 
 .EXAMPLE
-    .\New-CloudAdminAccountASDK.ps1
+    .\New-CloudAdminAccount.ps1
 #>
 [CmdletBinding()]
 Param
@@ -39,10 +39,10 @@ Param
     [parameter(Mandatory=$false,HelpMessage='Provide the Secret Name as it appears in the Admin Key Vault.')]
     [String]$CloudAdminSecretName = 'CloudAdminCredential',
 
-    # Define Privileged Endpoint
-    # Example: 'AZS-ERCS01'
-    [parameter(Mandatory=$false,HelpMessage='Define Privileged Endpoint. Example: AZS-ERCS01')]
-    [String]$PrivilegedEndpoint = 'AZS-ERCS01'
+    # Define list of Privileged Endpoints as an Array.
+    # Example: @("10.0.0.1","10.0.0.2","10.0.0.3")
+    [parameter(Mandatory=$false,HelpMessage='Define list of Privileged Endpoints as an Array. Example: @("10.0.0.1","10.0.0.2","10.0.0.3")')]
+    [Array]$PrivilegedEndpoints = @("10.0.0.1","10.0.0.2","10.0.0.3")
 )
 
 # Enviornment Selection
@@ -90,7 +90,7 @@ catch
 $NewCloudAdminCredentials = Get-Credential -Message 'Please provide the Username & Password for the new Cloud Admin Account'
 
 Invoke-Command -ConfigurationName PrivilegedEndpoint `
-    -ComputerName $PrivilegedEndpoint `
+    -ComputerName (Get-Random -InputObject $PrivilegedEndpoints) `
     -ScriptBlock { New-CloudAdminUser -UserName $Using:NewCloudAdminCredentials.UserName  -Password $Using:NewCloudAdminCredentials.Password }  `
     -Credential  $CloudAdminCredential
 

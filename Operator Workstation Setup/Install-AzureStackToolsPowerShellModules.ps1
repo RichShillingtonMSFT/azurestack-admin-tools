@@ -58,17 +58,26 @@ try
             Default {Write-Host "Default, Ending Install"; Exit} 
         }
 
-        foreach ($Module in $ModuleTest)
-        {
-            Uninstall-Module -Name $Module.Name -Force -Verbose
-        }
+        Get-Module | Remove-Module -Force
+
+        Get-Module -Name Azure* -ListAvailable | Uninstall-Module -Force -Verbose -ErrorAction Continue
+        Get-Module -Name Azs.* -ListAvailable | Uninstall-Module -Force -Verbose -ErrorAction Continue
+        Get-Module -Name Az.* -ListAvailable | Uninstall-Module -Force -Verbose -ErrorAction Continue
+
+    }
+    else
+    {
+        Write-Host "Azure Modules not found. Continuing" -ForegroundColor Green
     }
 }
 catch [exception]
 {
-    Write-Host "Azure Modules not found. Continuing" -ForegroundColor Green
+    Write-Host $_.Exception -ForegroundColor Red
 }
 #endregion
+
+Register-PSRepository -Default -ErrorAction SilentlyContinue
+Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
 
 #region Find and Remove Azure Stack Tools
 $InstalledLocations = @()

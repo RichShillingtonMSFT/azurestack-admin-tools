@@ -45,7 +45,7 @@ $VerbosePreference = 'Continue'
 Write-Output "Checking for existing Azure Modules"
 try
 {
-    $ModuleTest = Get-Module -ListAvailable | Where-Object {($_.Name -like "Az.*") -or ($_.Name -like "Azure*") -or ($_.Name -like "Azs.*")}
+    $ModuleTest = Get-Module -ListAvailable | Where-Object {($_.Name -like "Az.*") -or ($_.Name -like "Azure*") -or ($_.Name -like "Azs.*") -and ($_.Name -ne 'AzureStackInstallerCommon')}
     if ($ModuleTest)
     {
         Write-Warning "Found Azure Modules"

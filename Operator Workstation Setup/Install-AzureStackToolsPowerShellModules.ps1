@@ -116,6 +116,9 @@ else
 }
 #endregion
 
+# Set TLS Protocol 1.2
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
 #region Install Require Azure Modules
 If (($Version -ge '2002') -and ($AzModules -eq $false))
 {
@@ -143,9 +146,6 @@ If (($Version -ge '2002') -and ($AzModules -eq $false))
 
 If (($Version -ge '2002') -and ($AzModules -eq $true))
 {
-    # Set TLS Protocol 1.2
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
-    
     # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
     Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
     Install-Module -Name Az.BootStrapper -AllowPrerelease -Force -Verbose

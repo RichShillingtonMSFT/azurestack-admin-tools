@@ -16,7 +16,7 @@ Param
 
 #region Enviornment Selection
 $Environments = Get-AzureRmEnvironment
-$Environment = $Environments | Out-GridView -Title "Please Select an Azure Enviornment." -PassThru
+$Environment = $Environments | Out-GridView -Title "Please Select Your AzureStack Admin Enviornment." -PassThru
 #endregion
 
 #region Connect to Azure
@@ -35,7 +35,7 @@ try
     $Subscriptions = Get-AzureRmSubscription
     if ($Subscriptions.Count -gt '1')
     {
-        $Subscription = $Subscriptions | Out-GridView -Title "Please Select a Subscription." -PassThru
+        $Subscription = $Subscriptions | Out-GridView -Title "Please Select Your Default Provider Subscription." -PassThru
         Select-AzureRmSubscription $Subscription
     }
     else

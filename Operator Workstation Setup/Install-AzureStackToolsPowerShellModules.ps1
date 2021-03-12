@@ -58,8 +58,6 @@ try
             Default {Write-Host "Default, Ending Install"; Exit} 
         }
 
-        Get-Module | Remove-Module -Force
-
         Get-Module -Name Azure* -ListAvailable | Uninstall-Module -Force -Verbose -ErrorAction Continue
         Get-Module -Name Azs.* -ListAvailable | Uninstall-Module -Force -Verbose -ErrorAction Continue
         Get-Module -Name Az.* -ListAvailable | Uninstall-Module -Force -Verbose -ErrorAction Continue

@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Script to add the Azure Stack User Environment for PowerShell
 
@@ -15,7 +15,7 @@
     Example: blabla.cloud.contoso.com
 
 .EXAMPLE
-    .\Add-AzureStackUserEnvironment.ps1
+    .\Add-AzureStackUserEnvironment-AzureRMModules.ps1
 #>
 [CmdletBinding()]
 Param
@@ -31,4 +31,4 @@ Param
     [String]$AzureStackDomainFQDN
 )
 
-Add-AzEnvironment -Name $UserEnvironmentName -ARMEndpoint ('https://management.' + $AzureStackDomainFQDN)
+Add-AzureRmEnvironment -Name $UserEnvironmentName -ARMEndpoint ('https://management.' + $AzureStackDomainFQDN)

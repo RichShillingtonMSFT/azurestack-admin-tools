@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Script to add the Azure Stack Admin Environment for PowerShell
 
@@ -15,7 +15,7 @@
     Example: blabla.cloud.contoso.com
 
 .EXAMPLE
-    .\Add-AzureStackAdminEnvironment.ps1
+    .\Add-AzureStackAdminEnvironment-AzureRMModules.ps1
 #>
 [CmdletBinding()]
 Param
@@ -31,6 +31,6 @@ Param
     [String]$AzureStackDomainFQDN
 )
 
-Add-AzEnvironment -Name $AdminEnvironmentName -ARMEndpoint ('https://adminmanagement.' + $AzureStackDomainFQDN) `
+Add-AzureRmEnvironment -Name $AdminEnvironmentName -ARMEndpoint ('https://adminmanagement.' + $AzureStackDomainFQDN) `
     -AzureKeyVaultDnsSuffix ('adminvault.' + $AzureStackDomainFQDN) `
     -AzureKeyVaultServiceEndpointResourceId ('https://adminvault.' + $AzureStackDomainFQDN)

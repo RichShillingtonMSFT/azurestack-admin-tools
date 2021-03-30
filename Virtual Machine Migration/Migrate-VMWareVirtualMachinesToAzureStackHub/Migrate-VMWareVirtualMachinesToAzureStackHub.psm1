@@ -86,7 +86,7 @@ Function Invoke-PowerCLICheck
         }
     }
 }
-##Export-ModuleMember -Function Invoke-PowerCLICheck
+#Export-ModuleMember -Function Invoke-PowerCLICheck
 
 Function Get-VMWareVMMigrationReadinessReport 
 {
@@ -209,7 +209,7 @@ Function Get-VMWareVMMigrationReadinessReport
     $MigrationReadyVMs | Export-Csv $FileSaveLocation\$('VMWareVMsReadyForMigration-' + $(Get-Date -f yyyy-MM-dd) + '.csv') -NoTypeInformation
     $MigrationNotReadyVMs | Export-Csv $FileSaveLocation\$('VMWareVMsNOTReadyForMigration-' + $(Get-Date -f yyyy-MM-dd) + '.csv') -NoTypeInformation
 }
-##Export-ModuleMember -Function Get-VMWareVMMigrationReadinessReport
+#Export-ModuleMember -Function Get-VMWareVMMigrationReadinessReport
 
 Function Install-WindowsAzureVirtualMachineAgent
 {
@@ -341,7 +341,7 @@ Function Install-WindowsAzureVirtualMachineAgent
 
     Remove-PSSession $Session
 }
-##Export-ModuleMember -Function Install-WindowsAzureVirtualMachineAgent
+#Export-ModuleMember -Function Install-WindowsAzureVirtualMachineAgent
 
 Function Invoke-WindowsAzureVirtualMachineSettingsConfiguration
 {
@@ -421,7 +421,7 @@ Function Invoke-WindowsAzureVirtualMachineSettingsConfiguration
     Remove-PSSession $Session
     Write-Host "Azure Virtual Machine Settings Configuration Complete" -ForegroundColor Green
 }
-##Export-ModuleMember -Function Invoke-WindowsAzureVirtualMachineSettingsConfiguration
+#Export-ModuleMember -Function Invoke-WindowsAzureVirtualMachineSettingsConfiguration
 
 Function Invoke-VMWareVMExport
 {
@@ -484,7 +484,7 @@ Function Invoke-VMWareVMExport
 
     $Export | Select-Object BaseName,Name,DirectoryName,FullName,Extension | Export-Csv $FileSaveLocation\$($VirtualMachineName + '-ExportData' + '.csv') -NoTypeInformation
 }
-##Export-ModuleMember -Function Invoke-VMWareVMExport
+#Export-ModuleMember -Function Invoke-VMWareVMExport
 
 Function Convert-VMDKToVHD
 {
@@ -528,7 +528,7 @@ Function Convert-VMDKToVHD
         }
     }
 }
-##Export-ModuleMember -Function Convert-VMDKToVHD
+#Export-ModuleMember -Function Convert-VMDKToVHD
 
 Function Invoke-VMWareVHDRightSizing
 {
@@ -590,7 +590,7 @@ Function Invoke-VMWareVHDRightSizing
     }
     Write-Host "Disk Resizing Complete" -ForegroundColor Green
 }
-##Export-ModuleMember -Function Invoke-HyperVVHDRightSizing
+#Export-ModuleMember -Function Invoke-HyperVVHDRightSizing
 
 Function Invoke-CreateAuthHeader
 {
@@ -605,7 +605,7 @@ Function Invoke-CreateAuthHeader
 
     return $AuthHeader
 }
-##Export-ModuleMember -Function Invoke-CreateAuthHeader
+#Export-ModuleMember -Function Invoke-CreateAuthHeader
 
 Function Invoke-ResourceNameAvailability 
 {
@@ -637,7 +637,7 @@ Function Invoke-ResourceNameAvailability
     $Results = Invoke-RestMethod -Uri $restUri -Method Post -Headers $AuthHeader -Body $Body
     return $Results
 }
-##Export-ModuleMember -Function Invoke-ResourceNameAvailability
+#Export-ModuleMember -Function Invoke-ResourceNameAvailability
 
 Function Invoke-IPConfigurationsQuery
 {
@@ -660,7 +660,7 @@ Function Invoke-IPConfigurationsQuery
     $Results = Invoke-RestMethod -Uri $restUri -Method Get -Headers $AuthHeader
     return $Results
 }
-##Export-ModuleMember -Function Invoke-ipConfigurationsQuery
+#Export-ModuleMember -Function Invoke-ipConfigurationsQuery
 
 Function Install-AzCopy 
 {
@@ -706,7 +706,7 @@ Function Install-AzCopy
         [Environment]::SetEnvironmentVariable("Path", ($env:path), [System.EnvironmentVariableTarget]::Machine)
     }
 }
-##Export-ModuleMember -Function Install-AzCopy
+#Export-ModuleMember -Function Install-AzCopy
 
 Function Get-IPAddressesInSubnet
 {
@@ -899,7 +899,7 @@ Function Get-IPAddressesInSubnet
     $IPsInRange = New-IPRange -start $SubnetDetails.HostMin -end $SubnetDetails.HostMax
     return $IPsInRange
 }
-##Export-ModuleMember -Function Get-IPAddressesInSubnet
+#Export-ModuleMember -Function Get-IPAddressesInSubnet
 
 Function Invoke-PublicIPCreation
 {
@@ -956,7 +956,7 @@ Function Invoke-PublicIPCreation
  
     return $PublicIP
 }
-##Export-ModuleMember -Function Invoke-PublicIPCreation
+#Export-ModuleMember -Function Invoke-PublicIPCreation
 
 Function Invoke-ResourceGroupSelectionCreation
 {
@@ -1026,7 +1026,7 @@ Function Invoke-ResourceGroupSelectionCreation
     return $ResourceGroup
 
 }
-##Export-ModuleMember -Function Invoke-ResourceGroupSelectionCreation
+#Export-ModuleMember -Function Invoke-ResourceGroupSelectionCreation
 
 Function Invoke-StorageAccountSelectionCreation
 {
@@ -1163,7 +1163,7 @@ Function Invoke-StorageAccountSelectionCreation
 
     return $DestinationStorageAccountContainer,$DestinationStorageAccount
 }
-##Export-ModuleMember -Function Invoke-StorageAccountSelectionCreation
+#Export-ModuleMember -Function Invoke-StorageAccountSelectionCreation
 
 Function Invoke-VirtualNetworkSelectionCreation
 {
@@ -1388,7 +1388,7 @@ Function Invoke-VirtualNetworkSelectionCreation
     }
     return $VirtualNetworkResourceGroup.ResourceGroupName,$VirtualNetwork.Id,$VirtualNetworkSubnet.Id
 }
-##Export-ModuleMember -Function Invoke-VirtualNetworkSelectionCreation
+#Export-ModuleMember -Function Invoke-VirtualNetworkSelectionCreation
 
 Function Get-VMWareAzureVirtualMachineSizeFromOVF
 {
@@ -1425,7 +1425,7 @@ Function Get-VMWareAzureVirtualMachineSizeFromOVF
 
     return $AzureStackVMSizeList
 }
-##Export-ModuleMember -Function Get-HyperVAzureVirtualMachineSizeFromHost
+#Export-ModuleMember -Function Get-HyperVAzureVirtualMachineSizeFromHost
 
 function Invoke-VHDUploadToStorageAccount
 {
@@ -1439,7 +1439,7 @@ function Invoke-VHDUploadToStorageAccount
     $env:AZCOPY_DEFAULT_SERVICE_API_VERSION="2017-11-09"
     azcopy copy $VHDFilePath $StorageAccountDestinationURL --blob-type=PageBlob
 }
-##Export-ModuleMember -Function Invoke-VHDUploadToStorageAccount
+#Export-ModuleMember -Function Invoke-VHDUploadToStorageAccount
 
 Function Invoke-VMWareVMImageCopyHyperVToAzureStackHub
 {

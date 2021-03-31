@@ -1516,11 +1516,6 @@ Function Invoke-VMWareVMImageCopyHyperVToAzureStackHub
     $VirtualMachineFiles = Import-Csv ($FileSaveLocation + '\' + $VirtualMachineName + '-ExportData' + '.csv')
     $VMDiskFiles = Get-ChildItem $VirtualMachineFiles[0].DirectoryName -Recurse -Include *.vhd
 
-    # load it into an XML object
-    $OVFPath = ($VirtualMachineFiles | Where-Object {$_.Extension -eq '.ovf'}).FullName
-    $XML = New-Object -TypeName XML
-    $XML.Load($OVFPath)
-
     # Create SAS Token
     $StartTime = Get-Date
     $EndTime = $startTime.AddHours(8.0)
@@ -1560,12 +1555,7 @@ Function New-AzureStackVirtualMachineFromHyperVAndDataFile
 
         # Specify the output location for the CSV File
 	    [Parameter(Mandatory=$false,HelpMessage="Specify the output location for the CSV File. Example C:\Temp")]
-	    [String]$FileSaveLocation = "$env:USERPROFILE\Documents\",
-
-        # Specify the VM Operating System
-	    [Parameter(Mandatory=$true,HelpMessage="pecify the VM Operating System. Example Windows or Linux")]
-        [ValidateSet('Windows','Linux')]
-	    [String]$VirtualMachineOperatingSystem
+	    [String]$FileSaveLocation = "$env:USERPROFILE\Documents\"
     )
 
     $ErrorActionPreference = 'Stop'
@@ -1630,6 +1620,19 @@ Function New-AzureStackVirtualMachineFromHyperVAndDataFile
     }
 
     $Location = (Get-AzureRMLocation).Location
+
+    # load it into an XML object
+    $OVFPath = ($VirtualMachineFiles | Where-Object {$_.Extension -eq '.ovf'}).FullName
+    $XML = New-Object -TypeName XML
+    $XML.Load($OVFPath)
+    if ($XML.Envelope.VirtualSystem.OperatingSystemSection.osType -like "windows*")
+    {
+        $VirtualMachineOperatingSystem = 'Windows'
+    }
+    else 
+    {
+        $VirtualMachineOperatingSystem = 'Linux'
+    }
 
     $ResourceGroup = Invoke-ResourceGroupSelectionCreation -ResourceGroupMessage "Please Select an Existing or New Resource Group for the Virtual Machine $VirtualMachineName"
 

@@ -465,7 +465,7 @@ Function Invoke-VMWareVMExport
         Write-Host "Exporting Virtual Machine $VirtualMachineName to $VMSaveLocation"
         Write-Host "This may take a while. Please wait..."
         $Export = Export-VApp -VM $VirtualMachineName -Destination $VMSaveLocation  
-        Write-Host "Virtual Machine $VirtualMachineName has been exported to $VMSaveLocation"  
+        Write-Host "Virtual Machine $VirtualMachineName has been exported to $VMSaveLocation" -ForegroundColor Green
     }
     catch 
     {
@@ -507,7 +507,7 @@ Function Convert-VMDKToVHD
 
     foreach ($VirtualMachineVMDK in $VirtualMachineVMDKLocations)
     {
-        Write-Host "Converting $VirtualMachineVMDK to a Fixed Size VHD File. This may take a while..."
+        Write-Host "Converting VMDK $VirtualMachineVMDK to a Fixed Size VHD File. This may take a while..."
         $DestinationPath = $VirtualMachineVMDK.Replace('vmdk','vhd')
         try 
         {
@@ -536,7 +536,13 @@ Function Invoke-VMWareVHDRightSizing
         [String]$FileSaveLocation = "$env:USERPROFILE\Documents\"
     )
     
-    Import-Module Hyper-V
+    $ModuleCheck = Get-Module | Where-Object {$_.Name -eq 'VMware.PowerCLI'}
+    if ($ModuleCheck)
+    {
+        Remove-Module -Name 'VMware.PowerCLI' -Force
+    }
+
+    Import-Module Hyper-V -Force
 
     $RequiredDiskSizes = @(
         @{SizeInGB = 128; SizeInBytes = 137438953472}

@@ -1,5 +1,6 @@
 Function Invoke-PowerCLICheck
 {
+    <#
     $HyperVModuleCheck = Get-Module -ListAvailable | Where-Object {$_.Name -eq 'Hyper-V'}
     if ($HyperVModuleCheck)
     {
@@ -25,7 +26,7 @@ Function Invoke-PowerCLICheck
             break
         }
     }
-
+    #>
     $PowerCLIModuleAvailable = Find-Module -Name VMware.PowerCLI
 
     $ModuleCheck = Get-Module -ListAvailable | Where-Object {$_.Name -eq 'VMware.PowerCLI'}
@@ -333,7 +334,7 @@ Function Install-WindowsAzureVirtualMachineAgent
     }
 
     Write-Host "Installing Azure Virtual Machine Agent on $VirtualMachineName..."
-    Invoke-Command -Session $Session -ScriptBlock {Start-Process msiexec.exe -ArgumentList "/package C:\Windows\AzureVirtualMachineAgent\WindowsAzureVmAgent.msi /quiet /log C:\Windows\AzureVirtualMachineAgent\install.log" -Wait -LoadUserProfile}
+    Invoke-Command -Session $Session -ScriptBlock {Start-Process msiexec.exe -ArgumentList "/package C:\Windows\AzureVirtualMachineAgent\WindowsAzureVmAgent.msi /quiet /log C:\Windows\AzureVirtualMachineAgent\install.log" -Wait}
     
     # Remove Persistent Drive
     $PSDrive | Remove-PSDrive -Force
@@ -472,14 +473,32 @@ Function Invoke-VMWareVMExport
         break
     }
 
+    # Power Off VM If Running
+    Write-Host "Checking VM Power State"
+    $VirtualMachine = Get-VM -Name $VirtualMachineName
+    if ($VirtualMachine.PowerState -ne 'PoweredOff')
+    {
+        Write-Warning -Message "Virtual Machine $VirtualMachineName will be powered off."
+        $VirtualMachine | Stop-VM -Verbose
+        while ((Get-VM -Name $VirtualMachineName).PowerState -ne 'PoweredOff') 
+        {
+            Write-Warning -Message "Waiting for Virtual Machine $VirtualMachineName to power off..."
+            Start-Sleep -Seconds 5
+        }
+    }
+
     try 
     {
         Write-Host "Exporting Virtual Machine $VirtualMachineName to $VMSaveLocation"
-        $Export = Export-VApp -VM $VirtualMachineName -Destination $VMSaveLocation    
+        Write-Host "This may take a while. Please wait..."
+        $Export = Export-VApp -VM $VirtualMachineName -Destination $VMSaveLocation  
+        Write-Host "Virtual Machine $VirtualMachineName has been exported to $VMSaveLocation"  
     }
     catch 
     {
-        $Export 
+        Write-Warning -Message "Failed to export Virtual Machine $VirtualMachineName to $VMSaveLocation"
+        $_
+        break
     }
 
     $Export | Select-Object BaseName,Name,DirectoryName,FullName,Extension | Export-Csv $FileSaveLocation\$($VirtualMachineName + '-ExportData' + '.csv') -NoTypeInformation

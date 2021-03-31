@@ -285,24 +285,30 @@ Function Install-WindowsAzureVirtualMachineAgent
             Write-Warning -Message "Error Creating Folder $RemoteFolderPath"
             break
         }
+
+        Write-Host "Copying WindowsAzureVmAgent.msi to $RemoteFilePath"
+        try 
+        {
+            Copy-Item $File $RemoteFilePath -Force -ErrorAction Stop
+        }
+        catch 
+        {
+            Write-Warning -Message "Error Copying File $RemoteFilePath"
+            break
+        }
         
     }
     else 
     {
-        Write-Host "Checking if Azure Virtual Machine Agent is already downloaded on the remote machine."
-        if (!(Test-Path $RemoteFilePath))
+        Write-Host "Copying WindowsAzureVmAgent.msi to $RemoteFilePath"
+        try 
         {
-            # Download AzCopy zip for Windows
-            Write-Host "Azure Virtual Machine Agent was not found. Copying..."
-            try 
-            {
-                Copy-Item $File $RemoteFilePath -ErrorAction Stop
-            }
-            catch 
-            {
-                Write-Warning -Message "Error Copying File $RemoteFilePath"
-                break
-            }
+            Copy-Item $File $RemoteFilePath -Force -ErrorAction Stop
+        }
+        catch 
+        {
+            Write-Warning -Message "Error Copying File $RemoteFilePath"
+            break
         }
     }
 
@@ -1634,7 +1640,7 @@ Function New-AzureStackVirtualMachineFromHyperVAndDataFile
     {
         $VirtualMachineOperatingSystem = 'Linux'
     }
-    
+
     $ResourceGroup = Invoke-ResourceGroupSelectionCreation -ResourceGroupMessage "Please Select an Existing or New Resource Group for the Virtual Machine $VirtualMachineName"
 
     $VMManagedDisks = @()

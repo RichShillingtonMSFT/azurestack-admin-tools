@@ -204,29 +204,35 @@ Function Install-WindowsAzureVirtualMachineAgent
             Write-Warning -Message "Error Creating Folder $RemoteFolderPath"
             break
         }
+
+        Write-Host "Copying WindowsAzureVmAgent.msi to $RemoteFilePath"
+        try 
+        {
+            Copy-Item $File $RemoteFilePath -Force -ErrorAction Stop
+        }
+        catch 
+        {
+            Write-Warning -Message "Error Copying File $RemoteFilePath"
+            break
+        }
         
     }
     else 
     {
-        Write-Host "Checking if Azure Virtual Machine Agent is already downloaded on the remote machine."
-        if (!(Test-Path $RemoteFilePath))
+        Write-Host "Copying WindowsAzureVmAgent.msi to $RemoteFilePath"
+        try 
         {
-            # Download AzCopy zip for Windows
-            Write-Host "Azure Virtual Machine Agent was not found. Copying..."
-            try 
-            {
-                Copy-Item $File $RemoteFilePath -ErrorAction Stop
-            }
-            catch 
-            {
-                Write-Warning -Message "Error Copying File $RemoteFilePath"
-                break
-            }
+            Copy-Item $File $RemoteFilePath -Force -ErrorAction Stop
+        }
+        catch 
+        {
+            Write-Warning -Message "Error Copying File $RemoteFilePath"
+            break
         }
     }
 
     Write-Host "Installing Azure Virtual Machine Agent on $VirtualMachineName..."
-    Invoke-Command -Session $Session -ScriptBlock {Start-Process msiexec.exe -ArgumentList "/package C:\Windows\AzureVirtualMachineAgent\WindowsAzureVmAgent.msi /quiet /log C:\Windows\AzureVirtualMachineAgent\install.log" -Wait -LoadUserProfile}
+    Invoke-Command -Session $Session -ScriptBlock {Start-Process msiexec.exe -ArgumentList "/package C:\Windows\AzureVirtualMachineAgent\WindowsAzureVmAgent.msi /quiet /log C:\Windows\AzureVirtualMachineAgent\install.log" -Wait}
     
     # Remove Persistent Drive
     $PSDrive | Remove-PSDrive -Force

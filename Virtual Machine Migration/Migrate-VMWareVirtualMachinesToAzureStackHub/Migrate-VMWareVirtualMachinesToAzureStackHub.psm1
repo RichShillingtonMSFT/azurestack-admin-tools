@@ -594,7 +594,7 @@ Function Invoke-VMWareVHDRightSizing
     }
     Write-Host "Disk Resizing Complete" -ForegroundColor Green
 }
-Export-ModuleMember -Function Invoke-HyperVVHDRightSizing
+Export-ModuleMember -Function Invoke-VMWareVHDRightSizing
 
 Function Invoke-CreateAuthHeader
 {
@@ -1429,7 +1429,7 @@ Function Get-VMWareAzureVirtualMachineSizeFromOVF
 
     return $AzureStackVMSizeList
 }
-Export-ModuleMember -Function Get-HyperVAzureVirtualMachineSizeFromHost
+Export-ModuleMember -Function Get-VMWareAzureVirtualMachineSizeFromOVF
 
 function Invoke-VHDUploadToStorageAccount
 {

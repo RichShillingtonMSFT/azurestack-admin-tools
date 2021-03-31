@@ -1622,6 +1622,7 @@ Function New-AzureStackVirtualMachineFromHyperVAndDataFile
     $Location = (Get-AzureRMLocation).Location
 
     # load it into an XML object
+    $VirtualMachineFiles = Import-Csv ($FileSaveLocation + '\' + $VirtualMachineName + '-ExportData' + '.csv')
     $OVFPath = ($VirtualMachineFiles | Where-Object {$_.Extension -eq '.ovf'}).FullName
     $XML = New-Object -TypeName XML
     $XML.Load($OVFPath)
@@ -1633,7 +1634,7 @@ Function New-AzureStackVirtualMachineFromHyperVAndDataFile
     {
         $VirtualMachineOperatingSystem = 'Linux'
     }
-
+    
     $ResourceGroup = Invoke-ResourceGroupSelectionCreation -ResourceGroupMessage "Please Select an Existing or New Resource Group for the Virtual Machine $VirtualMachineName"
 
     $VMManagedDisks = @()

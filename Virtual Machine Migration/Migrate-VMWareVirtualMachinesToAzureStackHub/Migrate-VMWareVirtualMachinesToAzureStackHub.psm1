@@ -1,32 +1,5 @@
 Function Invoke-PowerCLICheck
 {
-    <#
-    $HyperVModuleCheck = Get-Module -ListAvailable | Where-Object {$_.Name -eq 'Hyper-V'}
-    if ($HyperVModuleCheck)
-    {
-        Write-Warning -Message "PowerShell Module for Hyper-V was found!"
-        Write-Warning -Message "You cannot run PowerCLI and Hyper-V Modules on the same system."
-
-        # Hyper-V Module Uninstall
-        $Yes = New-Object System.Management.Automation.Host.ChoiceDescription '&Yes'
-        $No = New-Object System.Management.Automation.Host.ChoiceDescription '&No'
-        $Options = [System.Management.Automation.Host.ChoiceDescription[]]($Yes, $No)
-        $Title = 'Remove Hyper-V Module?'
-        $Message = 'Do you want to remove the Hyper-V Module and continue with PowerCLI Install?'
-        $RemoveHyperVModule = $host.ui.PromptForChoice($title, $message, $options, 0)
-
-        if ($RemoveHyperVModule -eq 0)
-        {
-            Remove-Module -Name $HyperVModuleCheck.Name -Force -Verbose
-            Uninstall-Module -Name $HyperVModuleCheck.Name-Force -Verbose
-        }
-        if ($RemoveHyperVModule -eq 1)
-        {
-            Write-Host "Please try the install again on a workstation without the Hyper-V module."
-            break
-        }
-    }
-    #>
     $PowerCLIModuleAvailable = Find-Module -Name VMware.PowerCLI
 
     $ModuleCheck = Get-Module -ListAvailable | Where-Object {$_.Name -eq 'VMware.PowerCLI'}

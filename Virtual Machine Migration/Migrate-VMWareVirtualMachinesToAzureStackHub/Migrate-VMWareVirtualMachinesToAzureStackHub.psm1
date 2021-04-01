@@ -1550,7 +1550,7 @@ Function Invoke-VMWareVMImageCopyHyperVToAzureStackHub
 }
 Export-ModuleMember -Function Invoke-VMWareVMImageCopyHyperVToAzureStackHub
 
-Function New-AzureStackVirtualMachineFromHyperVAndDataFile
+Function New-AzureStackVirtualMachineFromVMWareDataFile
 {
     [CmdletBinding()]
     Param 
@@ -1775,4 +1775,4 @@ Function New-AzureStackVirtualMachineFromHyperVAndDataFile
     Write-Host "This may take a few minutes. Please wait..."
     New-AzureRmVM -VM $VMConfig -Location $Location -ResourceGroupName $ResourceGroup.ResourceGroupName -Verbose
 }
-Export-ModuleMember -Function New-AzureStackVirtualMachineFromHyperVAndDataFile
+Export-ModuleMember -Function New-AzureStackVirtualMachineFromVMWareDataFile

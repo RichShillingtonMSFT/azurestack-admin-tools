@@ -12,6 +12,7 @@ This PowerShell Module is used to Migrate Virtual Machines on Hyper-V to Azure S
 - This process will shutdown the Source Virtual Machine during migration
 - You must have enough free space on the source Hyper-V server to accommodate thick provisioned disk as well as backup copies for repaired VMs
 - You must have an account in a Azure Stack Hub Subscription
+- Virtual Machines MUST be Gen 1 NOT Gen 2. (I am working on this, but it will take some time.)
 
 ***
 

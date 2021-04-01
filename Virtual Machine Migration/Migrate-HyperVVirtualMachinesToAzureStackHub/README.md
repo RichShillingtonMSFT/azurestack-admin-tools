@@ -20,8 +20,10 @@ This PowerShell Module is used to Migrate Virtual Machines on Hyper-V to Azure S
 Install this folder in your preferred PowerShell Modules directory.
 
 From a PowerShell console run:
-- Import-Module -Name Migrate-HyperVVirtualMachinesToAzureStackHub
-- Import-Module -Name Hyper-V
+```
+Import-Module -Name Migrate-HyperVVirtualMachinesToAzureStackHub
+Import-Module -Name Hyper-V
+```
 
 ***
 
@@ -31,11 +33,13 @@ The first step is to get the migration readiness reports.
 
 From a PowerShell Window run: 
 
+```
 $HypervisorHost = '[HyperVisor Host Name or IP]'
 
 $Credentials = Get-Credential -Message 'Enter Your Credentials for The Source Hypervisor Host'
 
 Get-HyperVVMMigrationReadinessReport -HypervisorHost $HypervisorHost -Credentials $Credentials
+```
 
 This will save two CSV files in your Documents folder.
 

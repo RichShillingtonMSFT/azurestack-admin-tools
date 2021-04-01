@@ -61,8 +61,6 @@ Example:
 ### Install the Windows Azure Virtual Machine Agent:
 
 ```
-$Credentials = Get-Credential -Message 'Enter Your Credentials for The Source Hypervisor Host'
-
 $VirtualMachineCredentials = Get-Credential -Message 'Enter Your Credentials for The Source Virtual Machine'
 
 $VirtualMachineName = '[Name or IP of the Virtual Machine to Migrate]'

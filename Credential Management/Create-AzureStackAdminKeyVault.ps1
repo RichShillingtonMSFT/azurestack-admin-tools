@@ -75,7 +75,7 @@ catch
 
 $CloudAdminCredential = $host.ui.PromptForCredential("", 'Please provide the Cloud Admin Password to store in the Key Vault', "CloudAdmin", "")
 
-$Location = Get-AzsLocation -WarningAction SilentlyContinue
+$Location = Get-AzureRMLocation -WarningAction SilentlyContinue
 
 if (!(Get-AzureRmKeyVault -VaultName $AdminKeyVaultName))
 {

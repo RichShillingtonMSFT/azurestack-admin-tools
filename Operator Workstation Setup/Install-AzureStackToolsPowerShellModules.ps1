@@ -28,12 +28,6 @@ Param
     [Switch]$AzModules
 )
 
-if (($Version -lt '2002') -and ($AzModules -eq $true))
-{
-    Write-Warning "You must have version 2002 with the latest hotfix installed prior to using AzModules"
-    break
-}
-
 #Requires -Version 5
 #Requires -RunAsAdministrator
 #Requires -Module PowerShellGet
@@ -41,206 +35,201 @@ if (($Version -lt '2002') -and ($AzModules -eq $true))
 
 $VerbosePreference = 'Continue'
 
-#region Find and Remove Azure Modules
-Write-Output "Checking for existing Azure Modules"
-try
+if (($Version -lt '2002') -and ($AzModules -eq $true))
 {
-    $ModuleTest = Get-Module -ListAvailable | Where-Object {($_.Name -like "Az.*") -or ($_.Name -like "Azure*") -or ($_.Name -like "Azs.*") -and ($_.Name -ne 'AzureStackInstallerCommon')}
-    if ($ModuleTest)
-    {
-        Write-Warning "Found Azure Modules"
-        Write-host "All Azure Modules will be removed! Do you want to continue? (Default is No)" -ForegroundColor Yellow 
-        $Readhost = Read-Host " ( Y / N ) " 
-        Switch ($ReadHost) 
-        { 
-            Y {Write-Warning "Uninstalling Azure Modules"} 
-            N {Write-Host "No, Ending Install"; Exit} 
-            Default {Write-Host "Default, Ending Install"; Exit} 
-        }
-
-        Get-Module -Name Azure* -ListAvailable | Uninstall-Module -Force -Verbose -ErrorAction Continue
-        Get-Module -Name Azs.* -ListAvailable | Uninstall-Module -Force -Verbose -ErrorAction Continue
-        Get-Module -Name Az.* -ListAvailable | Uninstall-Module -Force -Verbose -ErrorAction Continue
-
-    }
-    else
-    {
-        Write-Host "Azure Modules not found. Continuing" -ForegroundColor Green
-    }
-}
-catch [exception]
-{
-    Write-Host $_.Exception -ForegroundColor Red
-}
-#endregion
-
-Register-PSRepository -Default -ErrorAction SilentlyContinue
-Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
-
-#region Find and Remove Azure Stack Tools
-$InstalledLocations = @()
-$ModulePaths = $env:PSModulePath.Split(';')
-
-foreach ($ModulePath in $ModulePaths)
-{
-    $ModulePath.TrimEnd('\')
-    $TestResults = Test-Path ($ModulePath.TrimEnd('\') + "\AzureStack-Tools-master")
-    if ($TestResults)
-    {
-        $InstalledLocations += ($ModulePath.TrimEnd('\') + "\AzureStack-Tools-master")
-    }
-    $TestResults = Test-Path ($ModulePath.TrimEnd('\') + "\AzureStack-Tools-az")
-    if ($TestResults)
-    {
-        $InstalledLocations += ($ModulePath.TrimEnd('\') + "\AzureStack-Tools-az")
-    }
-    $TestResults = Test-Path ($ModulePath.TrimEnd('\') + "\AzureStack")
-    if ($TestResults)
-    {
-        $InstalledLocations += ($ModulePath.TrimEnd('\') + "\AzureStack")
-    }
+    Write-Warning "You must have version 2002 with the latest hotfix installed prior to using AzModules"
+    break
 }
 
-if ($InstalledLocations.Count -gt '0')
+if ($Version -lt '1910')
 {
-    Foreach ($InstalledLocation in $InstalledLocations)
-    {
-        Remove-Item $InstalledLocation -Recurse -Force -Verbose
-    }
+    # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
+    Write-Host "YOU REALLY NEED TO UPDATE YOUR STACK!" -ForegroundColor Red
+    Write-Host "Update your stack to a supported version and try again!" -ForegroundColor Red
+    break
 }
-else
-{
-    Write-Host "Azure Stack Tools Modules not found. Continuing" -ForegroundColor Green
-}
-#endregion
 
 # Set TLS Protocol 1.2
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
-#region Install Require Azure Modules
-If (($Version -ge '2002') -and ($AzModules -eq $false))
+Register-PSRepository -Default -ErrorAction SilentlyContinue
+Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted
+
+$PowerShellGetAvailable = Find-Module -Name 'PowerShellGet'
+$PowerShellGetInstalled = Get-Module -ListAvailable | Where-Object {$_.Name -eq 'PowerShellGet'}
+
+if ($PowerShellGetInstalled.Count -gt 1)
 {
-    # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
-    Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
-    Install-Module -Name AzureRM.BootStrapper -Force -Verbose
+    $PowerShellGetInstalled = $PowerShellGetInstalled | Sort-Object Version | Select-Object -Last 1
+}
 
-    # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
-    Write-Host "Installing and importing the API Version Profile required by Azure Stack"
-    Use-AzureRmProfile -Profile 2019-03-01-hybrid -Force -Verbose
+if ($PowerShellGetAvailable.Version -gt $PowerShellGetInstalled.Version)
+{
+    Install-Module $PowerShellGetAvailable.Name -RequiredVersion $PowerShellGetAvailable.Version -AllowClobber -Force
 
-    $LoadedAzureModules = Get-Module | Where-Object {$_.Name -like "Azure*"}
-    foreach ($LoadedAzureModule in $LoadedAzureModules)
+    if ($AzModules)
     {
-        Write-Host "Removing module $($LoadedAzureModule.Name) from memory"
-        Remove-Module $LoadedAzureModule.Name -Force -Verbose
+        Start-Process PowerShell.exe -Verb RunAs -WindowStyle Maximized -ArgumentList "-command &", "$PSScriptRoot\Install-AzureStackToolsPowerShellModules.ps1" ,"-Version $Version", "-AzModule"
     }
-
-    Write-Host "Installing AzureStack Module"
-    Install-Module -Name AzureStack -RequiredVersion 1.8.2 -Force -WarningAction SilentlyContinue -Verbose
-
-    Write-Host "Installing Azs.Syndication.Admin Module"
-    Install-Module -Name Azs.Syndication.Admin -RequiredVersion 0.1.140
-}
-
-If (($Version -ge '2002') -and ($AzModules -eq $true))
-{
-    # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
-    Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
-    Install-Module -Name Az.BootStrapper -AllowPrerelease -Force -Verbose
-
-    # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
-    Write-Host "Installing and importing the API Version Profile required by Azure Stack"
-    Use-AzProfile -Profile 2019-03-01-hybrid -Force -Verbose
-
-    $LoadedAzureModules = Get-Module | Where-Object {$_.Name -like "Azure*"}
-    foreach ($LoadedAzureModule in $LoadedAzureModules)
+    else
     {
-        Write-Host "Removing module $($LoadedAzureModule.Name) from memory"
-        Remove-Module $LoadedAzureModule.Name -Force -Verbose
+        Start-Process PowerShell.exe -Verb RunAs -WindowStyle Maximized -ArgumentList "-command &", "$PSScriptRoot\Install-AzureStackToolsPowerShellModules.ps1", "-Version $Version"
     }
-
-    Write-Host "Installing AzureStack Module"
-    Install-Module -Name AzureStack -RequiredVersion '2.0.2-preview' -AllowPrerelease -Force -WarningAction SilentlyContinue -Verbose
-
-    Write-Host "Installing Azs.Syndication.Admin Module"
-    Install-Module -Name Azs.Syndication.Admin -RequiredVersion 0.1.140
+    
+    Exit
 }
 
-If ($Version -eq '1910')
+elseif ($PowerShellGetAvailable.Version -eq $PowerShellGetInstalled.Version)
 {
-    # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
-    Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
-    Install-Module -Name AzureRM.BootStrapper -Force -Verbose
+    Remove-Module -Name $PowerShellGetAvailable.Name -Force
+    Import-Module -Name $PowerShellGetAvailable.Name -RequiredVersion $PowerShellGetAvailable.Version -Force
 
-    # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
-    Write-Host "Installing and importing the API Version Profile required by Azure Stack"
-    Use-AzureRmProfile -Profile 2019-03-01-hybrid -Force -Verbose
-
-    $LoadedAzureModules = Get-Module | Where-Object {$_.Name -like "Azure*"}
-    foreach ($LoadedAzureModule in $LoadedAzureModules)
+#region Find and Remove Azure Modules
+    Write-Output "Checking for existing Azure Modules"
+    try
     {
-        Write-Host "Removing module $($LoadedAzureModule.Name) from memory"
-        Remove-Module $LoadedAzureModule.Name -Force -Verbose
+        $ModuleTest = Get-Module -ListAvailable -ErrorAction SilentlyContinue| Where-Object {($_.Name -like "Az.*") -or ($_.Name -like "Azure*") -or ($_.Name -like "Azs.*") -and ($_.Name -ne 'AzureStackInstallerCommon')}
+        if ($ModuleTest)
+        {
+            Write-Warning "Found Azure Modules"
+            Write-host "All Azure Modules will be removed! Do you want to continue? (Default is No)" -ForegroundColor Yellow 
+            $Readhost = Read-Host " ( Y / N ) " 
+            Switch ($ReadHost) 
+            { 
+                Y {Write-Warning "Uninstalling Azure Modules"} 
+                N {Write-Host "No, Ending Install"; Exit} 
+                Default {Write-Host "Default, Ending Install"; Exit} 
+            }
+
+            $AzureModules = Get-Module -ListAvailable -ErrorAction SilentlyContinue | Where-object {$_.Name -like "Azure*"}
+            foreach ($AzureModule in $AzureModules)
+            {
+                Uninstall-Module -Name $AzureModule.Name -AllVersions -Verbose -Force -ErrorAction Stop
+            }
+
+            $AzSModules = Get-Module -ListAvailable -ErrorAction SilentlyContinue | Where-object {$_.Name -like "Azs.*"}
+            foreach ($AzSModule in $AzSModules)
+            {
+                Uninstall-Module -Name $AzSModule.Name -AllVersions -Verbose -Force -ErrorAction Stop
+            }
+
+            $AzModules = Get-Module -ListAvailable -ErrorAction SilentlyContinue | Where-object {$_.Name -like "Az.*"}
+            foreach ($AzModule in $AzModules)
+            {
+                Uninstall-Module -Name $AzModule.Name -AllVersions -Verbose -Force -ErrorAction Stop
+            }
+            
+        }
+        else
+        {
+            Write-Host "Azure Modules not found. Continuing" -ForegroundColor Green
+        }
     }
-
-    Write-Host "Installing AzureStack Module"
-    Install-Module -Name AzureStack -RequiredVersion 1.8.0 -Force -WarningAction SilentlyContinue -Verbose
-
-    Write-Host "Installing Azs.Syndication.Admin Module"
-    Install-Module -Name Azs.Syndication.Admin -RequiredVersion 0.1.140
-}
-
-if (($Version -gt '1903') -and ($Version -le '1908'))
-{
-    # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
-    Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
-    Install-Module -Name AzureRM.BootStrapper -Verbose
-
-    # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
-    Write-Host "Installing and importing the API Version Profile required by Azure Stack"
-    Use-AzureRmProfile -Profile 2019-03-01-hybrid -Force -Verbose
-
-    $LoadedAzureModules = Get-Module | Where-Object {$_.Name -like "Azure*"}
-    foreach ($LoadedAzureModule in $LoadedAzureModules)
+    catch [exception]
     {
-        Write-Host "Removing module $($LoadedAzureModule.Name) from memory"
-        Remove-Module $LoadedAzureModule.Name -Force -Verbose
+        Write-Host $_.Exception -ForegroundColor Red
     }
-
-    Write-Host "Installing AzureStack Module"
-    Install-Module -Name AzureStack -RequiredVersion 1.7.2 -Force -WarningAction SilentlyContinue -Verbose
-}
-
-if ($Version -lt '1903')
-{
-    # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
-    Write-Host "Installing AzureRM Module"
-    Install-Module -Name AzureRM -RequiredVersion 2.4.0 -Force -Verbose
-
-    Write-Host "Installing AzureStack Module"
-    Install-Module -Name AzureStack -RequiredVersion 1.7.1 -Force -WarningAction SilentlyContinue -Verbose
-}
-
-Write-Host "Installing Microsoft.AzureStack.ReadinessChecker Module"
-Install-Module Microsoft.AzureStack.ReadinessChecker -Force -WarningAction SilentlyContinue -Verbose
 #endregion
+
+#region Find and Remove Azure Stack Tools
+    $InstalledLocations = @()
+    $ModulePaths = $env:PSModulePath.Split(';')
+
+    foreach ($ModulePath in $ModulePaths)
+    {
+        $ModulePath.TrimEnd('\')
+        $TestResults = Test-Path ($ModulePath.TrimEnd('\') + "\AzureStack-Tools-master") -ErrorAction SilentlyContinue
+        if ($TestResults)
+        {
+            $InstalledLocations += ($ModulePath.TrimEnd('\') + "\AzureStack-Tools-master")
+        }
+        $TestResults = Test-Path ($ModulePath.TrimEnd('\') + "\AzureStack-Tools-az") -ErrorAction SilentlyContinue
+        if ($TestResults)
+        {
+            $InstalledLocations += ($ModulePath.TrimEnd('\') + "\AzureStack-Tools-az")
+        }
+        $TestResults = Test-Path ($ModulePath.TrimEnd('\') + "\AzureStack") -ErrorAction SilentlyContinue
+        if ($TestResults)
+        {
+            $InstalledLocations += ($ModulePath.TrimEnd('\') + "\AzureStack")
+        }
+    }
+
+    if ($InstalledLocations.Count -gt '0')
+    {
+        Foreach ($InstalledLocation in $InstalledLocations)
+        {
+            Remove-Item $InstalledLocation -Recurse -Force -Verbose
+        }
+    }
+    else
+    {
+        Write-Host "Azure Stack Tools Modules not found. Continuing" -ForegroundColor Green
+    }
+#endregion
+
+
+#region Install Require Azure Modules
+    If (($Version -ge '2002') -and ($AzModules -eq $false))
+    {
+        # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
+        Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
+        Install-Module -Name AzureRM.BootStrapper -Force -Verbose
+
+        # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
+        Write-Host "Installing and importing the API Version Profile required by Azure Stack"
+        Use-AzureRmProfile -Profile 2019-03-01-hybrid -Force -Verbose
+
+        Write-Host "Installing AzureStack Module"
+        Install-Module -Name AzureStack -RequiredVersion 1.8.2 -AllowClobber -SkipPublisherCheck -Force -WarningAction SilentlyContinue -Verbose
+
+    }
+
+    If (($Version -ge '2002') -and ($AzModules -eq $true))
+    {
+        # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
+        Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
+        Install-Module -Name Az.BootStrapper -AllowPrerelease -AllowClobber -Force -Verbose
+
+        # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
+        Write-Host "Installing and importing the API Version Profile required by Azure Stack"
+        Use-AzProfile -Profile 2019-03-01-hybrid -Force -Verbose -ErrorAction SilentlyContinue
+
+        Write-Host "Installing AzureStack Module"
+        Install-Module -Name AzureStack -RequiredVersion '2.0.2-preview' -AllowPrerelease -AllowClobber -Force -WarningAction SilentlyContinue -Verbose
+    }
+
+    If ($Version -eq '1910')
+    {
+        # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
+        Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
+        Install-Module -Name AzureRM.BootStrapper -AllowClobber -Force -Verbose
+
+        # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
+        Write-Host "Installing and importing the API Version Profile required by Azure Stack"
+        Use-AzureRmProfile -Profile 2019-03-01-hybrid -Force -Verbose
+
+        Write-Host "Installing AzureStack Module"
+        Install-Module -Name AzureStack -RequiredVersion 1.8.0 -Force -WarningAction SilentlyContinue -Verbose
+    }
 
 #region Download, Install and Import AzureStack-Tools Module
-Write-Host "Installing Azure Stack Tools Master"
-Set-Location 'C:\Program Files\WindowsPowerShell\Modules'
-if (($Version -ge '2002') -and ($AzModules -eq $true))
-{
-    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 
-    invoke-webrequest https://github.com/Azure/AzureStack-Tools/archive/az.zip -OutFile az.zip
-    Expand-Archive 'az.zip' -DestinationPath 'C:\Program Files\WindowsPowerShell\Modules' -Force
-    Remove-Item 'az.zip'
-}
-else 
-{
-    Invoke-WebRequest 'https://github.com/Azure/AzureStack-Tools/archive/master.zip' -OutFile 'master.zip' -UseBasicParsing
-    Expand-Archive 'master.zip' -DestinationPath 'C:\Program Files\WindowsPowerShell\Modules' -Force
-    Remove-Item 'master.zip'
-}
-#endregion
+    Write-Host "Installing Azure Stack Tools Master"
+    if (($Version -ge '2002') -and ($AzModules -eq $true))
+    {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12 
+        invoke-webrequest https://github.com/Azure/AzureStack-Tools/archive/az.zip -OutFile $Env:Temp\az.zip -UseBasicParsing
+        Expand-Archive $Env:Temp\az.zip -DestinationPath 'C:\Program Files\WindowsPowerShell\Modules' -Force
+        Remove-Item "$Env:Temp\az.zip"
+    }
+    if (($Version -lt '2002') -and ($AzModules -eq $false))
+    {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        Invoke-WebRequest 'https://github.com/Azure/AzureStack-Tools/archive/master.zip' -OutFile $Env:Temp\master.zip -UseBasicParsing
+        Expand-Archive $Env:Temp\master.zip -DestinationPath 'C:\Program Files\WindowsPowerShell\Modules' -Force
+        Remove-Item "$Env:Temp\master.zip"
+    }
 
+#endregion
+}
 Write-Host "Setup Complete" -ForegroundColor Green

@@ -222,7 +222,7 @@ elseif ($PowerShellGetAvailable.Version -eq $PowerShellGetInstalled.Version)
         Expand-Archive $Env:Temp\az.zip -DestinationPath 'C:\Program Files\WindowsPowerShell\Modules' -Force
         Remove-Item "$Env:Temp\az.zip"
     }
-    if (($Version -lt '2002') -and ($AzModules -eq $false))
+    if ($AzModules -eq $false)
     {
         [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
         Invoke-WebRequest 'https://github.com/Azure/AzureStack-Tools/archive/master.zip' -OutFile $Env:Temp\master.zip -UseBasicParsing

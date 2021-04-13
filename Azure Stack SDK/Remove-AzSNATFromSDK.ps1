@@ -14,6 +14,12 @@
     route add 192.168.103.0 mask 255.255.255.128 [IP of the ASDK]
     route add 192.168.104.0 mask 255.255.255.128 [IP of the ASDK]
 
+    You can use this script to add the routes.
+    $Range = 100..104
+    foreach ($R in $Range) {Route add -p "192.168.$($R).0" mask 255.255.255.0 192.168.1.15}
+    Route add -p 192.168.200.0 mask 255.255.255.0 192.168.1.15
+
+
     You also need to export the certificates from the ASDK Hosts Trusted Root Certificate Authorities Store
     and import them in to you machine store in the same location to avoid connection errors.
     AzureStackCertificateAuthority.cer

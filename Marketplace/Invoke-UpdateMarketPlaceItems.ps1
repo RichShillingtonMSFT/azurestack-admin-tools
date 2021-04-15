@@ -75,7 +75,6 @@ Write-Host "Finding your downloaded Marketplace Items. This may take a minute...
 $DownloadedMarketPlaceItems = (Get-AzsAzureBridgeDownloadedProduct -WarningAction SilentlyContinue -ActivationName $($BridgeActivation.Name) -ResourceGroupName $ActivationResourceGroup -Verbose).Name -replace "default/", ""
 Write-Host "You have $($DownloadedMarketPlaceItems.count) Marketplace items downloaded"
 
-$MarketPlaceItemsWithUpdates = $null
 $MarketPlaceItemsWithUpdates = @()
 $MarketPlaceItemsWithUpdates += New-Object PSObject -Property ([ordered]@{UpdateName='ALL';UpdateVersion=''})
 $Progress = 0

@@ -53,61 +53,68 @@ foreach ($DownloadedMarketPlaceItem in $DownloadedMarketPlaceItems)
 
 $RemovedDuplicates = $DownloadedMarketPlaceItemsDetails.ItemName | Select-Object -Unique
 $Duplicates = (Compare-object –referenceobject $RemovedDuplicates –differenceobject $DownloadedMarketPlaceItemsDetails.ItemName).InputObject
-
-$DuplicateVersionDetails = @()
-foreach ($Duplicate in $Duplicates)
+if ($Duplicates.Count -ge 1)
 {
-    foreach ($DownloadedMarketPlaceItemDetail in $DownloadedMarketPlaceItemsDetails)
+    Write-Host "You have $($Duplicates.Count) Marketplace Items to cleanup" -ForegroundColor Yellow
+    $DuplicateVersionDetails = @()
+    foreach ($Duplicate in $Duplicates)
     {
-        if ($DownloadedMarketPlaceItemDetail.ItemName -eq $Duplicate)
+        foreach ($DownloadedMarketPlaceItemDetail in $DownloadedMarketPlaceItemsDetails)
         {
-            $DuplicateVersionDetails += $DownloadedMarketPlaceItemDetail
+            if ($DownloadedMarketPlaceItemDetail.ItemName -eq $Duplicate)
+            {
+                $DuplicateVersionDetails += $DownloadedMarketPlaceItemDetail
+            }
+        }
+    }
+
+    $DuplicateMarketPlaceVersions = @()
+    foreach ($DuplicateVersion in $DuplicateVersionDetails.ItemName | Get-Unique)
+    {
+        $VersionList = New-Object PSObject
+
+        $CurrentItem = $DuplicateVersionDetails | Where-Object {$_.ItemName -eq $DuplicateVersion}
+        $ItemVersions = $CurrentItem.ItemVersion | ForEach-Object { New-Object System.Version ($_) } | Sort-Object -Descending
+        $Property = [ordered]@{ItemName=$($CurrentItem[0].ItemName)}
+        $VersionList | Add-Member -NotePropertyMembers $Property 
+        $IsFirst = $True
+        Foreach ($ItemVersion in $ItemVersions)
+        {
+            $VersionID = 0
+            if ($IsFirst -eq $True)
+            {
+                $Property = [ordered]@{LatestVersion=$($ItemVersion)}
+                $VersionList | Add-Member -NotePropertyMembers $Property
+                $IsFirst = $False
+                $VersionID++
+            }
+            else
+            {
+                $PropertyName = ('OldVersion' + $VersionID)
+                $VersionList | Add-Member -NotePropertyMembers @{$PropertyName=$($ItemVersion)}
+                $VersionID++
+            }
+
+        }
+        $DuplicateMarketPlaceVersions += $VersionList
+    }
+
+    $ItemsToCleanup = $DuplicateMarketPlaceVersions | Out-GridView -Title "Please Select which Marketplace items you want to Cleanup" -PassThru
+
+    foreach ($ItemToCleanup in $ItemsToCleanup)
+    {
+        $Versions = $ItemToCleanup.PSObject.Properties | Where-Object {($_.Name -ne 'ItemName' -and $_.Name -ne 'LatestVersion')}
+        foreach ($Version in $Versions)
+        {
+            $ItemName = $ItemToCleanup.ItemName + '-' + $Version.Value
+            Write-host "Cleaning up $ItemName" -ForegroundColor Yellow
+            Write-host "This may take a minute..." -ForegroundColor Yellow
+            Remove-AzsAzureBridgeDownloadedProduct -Name $ItemName -ActivationName $($BridgeActivation.Name) -ResourceGroupName $ActivationResourceGroup -Verbose -Force
+            Write-host "$ItemName has been removed." -ForegroundColor Green
         }
     }
 }
-
-$DuplicateMarketPlaceVersions = @()
-foreach ($DuplicateVersion in $DuplicateVersionDetails.ItemName | Get-Unique)
+else 
 {
-    $VersionList = New-Object PSObject
-
-    $CurrentItem = $DuplicateVersionDetails | Where-Object {$_.ItemName -eq $DuplicateVersion}
-    $ItemVersions = $CurrentItem.ItemVersion | ForEach-Object { New-Object System.Version ($_) } | Sort-Object -Descending
-    $Property = [ordered]@{ItemName=$($CurrentItem[0].ItemName)}
-    $VersionList | Add-Member -NotePropertyMembers $Property 
-    $IsFirst = $True
-    Foreach ($ItemVersion in $ItemVersions)
-    {
-        $VersionID = 0
-        if ($IsFirst -eq $True)
-        {
-            $Property = [ordered]@{LatestVersion=$($ItemVersion)}
-            $VersionList | Add-Member -NotePropertyMembers $Property
-            $IsFirst = $False
-            $VersionID++
-        }
-        else
-        {
-            $PropertyName = ('OldVersion' + $VersionID)
-            $VersionList | Add-Member -NotePropertyMembers @{$PropertyName=$($ItemVersion)}
-            $VersionID++
-        }
-
-    }
-    $DuplicateMarketPlaceVersions += $VersionList
-}
-
-$ItemsToCleanup = $DuplicateMarketPlaceVersions | Out-GridView -Title "Please Select which Marketplace items you want to Cleanup" -PassThru
-
-foreach ($ItemToCleanup in $ItemsToCleanup)
-{
-    $Versions = $ItemToCleanup.PSObject.Properties | Where-Object {($_.Name -ne 'ItemName' -and $_.Name -ne 'LatestVersion')}
-    foreach ($Version in $Versions)
-    {
-        $ItemName = $ItemToCleanup.ItemName + '-' + $Version.Value
-        Write-host "Cleaning up $ItemName" -ForegroundColor Yellow
-        Write-host "This may take a minute..." -ForegroundColor Yellow
-        Remove-AzsAzureBridgeDownloadedProduct -Name $ItemName -ActivationName $($BridgeActivation.Name) -ResourceGroupName $ActivationResourceGroup -Verbose -Force
-        Write-host "$ItemName has been removed." -ForegroundColor Green
-    }
+    Write-Host "You have no Marketplace items to clean up" -ForegroundColor Green    
 }

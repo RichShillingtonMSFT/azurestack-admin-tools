@@ -232,7 +232,7 @@ function Invoke-MarketPlaceItemsCleanup
     }
 
     $RemovedDuplicates = $DownloadedMarketPlaceItemsDetails.ItemName | Select-Object -Unique
-    $Duplicates = (Compare-object –referenceobject $RemovedDuplicates –differenceobject $DownloadedMarketPlaceItemsDetails.ItemName).InputObject
+    $Duplicates = (Compare-object -ReferenceObject $RemovedDuplicates -DifferenceObject $DownloadedMarketPlaceItemsDetails.ItemName).InputObject
     if ($Duplicates.Count -ge 1)
     {
         Write-Host "You have $($Duplicates.Count) Marketplace Items to cleanup" -ForegroundColor Yellow

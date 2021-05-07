@@ -134,7 +134,6 @@ function Invoke-MarketPlaceItemsUpdate
 
     #region Find the latest versions
     $AvailableMarketPlaceItemsLatestVersions = @()
-    $AvailableMarketPlaceItemsLatestVersions += 'All'
 
     $Progress = 0
     foreach ($ItemVersion in $ItemVersions)
@@ -143,23 +142,17 @@ function Invoke-MarketPlaceItemsUpdate
         Write-Progress -Activity "Looking for the most recent version of $($ItemVersion.AvailableMarketPlaceItemName)" -Status "Progress:" -PercentComplete ($Progress/$ItemVersions.count*100)
         $AllVersions = $ItemVersions | Where-Object {$_.AvailableMarketPlaceItemName -eq $ItemVersion.AvailableMarketPlaceItemName}
 
-        $ProcessedVersions += $($ItemVersion.AvailableMarketPlaceItemName)
-
         if ($AllVersions.Count -gt 1)
         {
-           
-            $LatestVersion = $AllVersions | Sort-Object -Property AvailableMarketPlaceItemVersion -Descending | Select-Object -First 1
-            $ObjectName = $LatestVersion.AvailableMarketPlaceItemName + $LatestVersion.AvailableMarketPlaceItemVersion.ToString()
-            $AvailableMarketPlaceItemsLatestVersions += $ObjectName
+            $AvailableMarketPlaceItemsLatestVersions += $AllVersions | Sort-Object -Property AvailableMarketPlaceItemVersion -Descending | Select-Object -First 1
         }
         else 
         {
-            $ObjectName = $ItemVersion.AvailableMarketPlaceItemName + $ItemVersion.AvailableMarketPlaceItemVersion.ToString()
-            $AvailableMarketPlaceItemsLatestVersions += $ObjectName
+
+            $AvailableMarketPlaceItemsLatestVersions += $ItemVersion
         }
     }
 
-    $AvailableMarketPlaceItemsLatestVersions = $AvailableMarketPlaceItemsLatestVersions | Select-Object -Unique
     #endregion
 
     #region Find downloaded versions and compare to available
@@ -167,71 +160,76 @@ function Invoke-MarketPlaceItemsUpdate
     $DownloadedMarketPlaceItems = (Get-AzsAzureBridgeDownloadedProduct -WarningAction SilentlyContinue -ActivationName $($BridgeActivation.Name) -ResourceGroupName $ActivationResourceGroup -Verbose).Name -replace "default/", ""
     Write-Host "You have $($DownloadedMarketPlaceItems.count) Marketplace items downloaded"
 
-    $MarketPlaceItemsWithUpdates = @()
-    $MarketPlaceItemsWithUpdates += New-Object PSObject -Property ([ordered]@{UpdateName='ALL';UpdateVersion=''})
-    $Progress = 0
-    $ErrorActionPreference = 'Stop'
+    $DownloadedMarketPlaceItemVersions = @()
+    $DownloadedMarketPlaceItemLatestVersions = @()
 
     foreach ($DownloadedMarketPlaceItem in $DownloadedMarketPlaceItems)
     {
-        $Progress++
-        $CurrentMarketPlaceItemVersion = $DownloadedMarketPlaceItem.Split('-')[-1] | ForEach-Object { New-Object System.Version ($_) }
-        $CurrentMarketPlaceItemName = ($DownloadedMarketPlaceItem.Substring(0, $DownloadedMarketPlaceItem.lastIndexOf('-'))) + '-'
-        Write-Progress -Activity "Checking to see if $CurrentMarketPlaceItemName needs an update" -Status "Progress:" -PercentComplete ($Progress/$DownloadedMarketPlaceItems.count*100)
 
-        $AvailableUpdate = $AvailableMarketPlaceItemsLatestVersions | Where-Object {$_ -match "$CurrentMarketPlaceItemName\b[0-9].+"}
-        if (!$AvailableUpdate)
-        {
-            Write-Host "It appears that $DownloadedMarketPlaceItem has been removed from the online Marketplace." -ForegroundColor Red
-            Write-Host "If you no longer need this, you should remove it from your downloaded items." -ForegroundColor Red
-            Continue
-        }
-
-        $AvailableUpdateVersion = $AvailableUpdate.Split('-')[-1] | ForEach-Object { New-Object System.Version ($_) }
-        $AvailableUpdateName = $AvailableUpdate.Substring(0, $AvailableUpdate.lastIndexOf('-'))
-
-        if ($CurrentMarketPlaceItemVersion -lt $AvailableUpdateVersion)
-        {
-            Write-Host "There is an update for $CurrentMarketPlaceItemName" -ForegroundColor Green
-            Write-Host "You have version $CurrentMarketPlaceItemVersion" -ForegroundColor Green
-            Write-Host "The available version for $AvailableUpdateName is $AvailableUpdateVersion" -ForegroundColor Green
-            $MarketPlaceItemsWithUpdates += New-Object PSObject -Property ([ordered]@{UpdateName=$AvailableUpdateName;UpdateVersion=$AvailableUpdateVersion})
-        }
-        
+        $ItemVersion = $DownloadedMarketPlaceItem.Split('-')[-1] | ForEach-Object { New-Object System.Version ($_) }
+        $ItemName = ($DownloadedMarketPlaceItem.Substring(0, $DownloadedMarketPlaceItem.lastIndexOf('-'))) + '-'
+        $DownloadedMarketPlaceItemVersions += New-Object PSObject -Property ([ordered]@{ItemName=$ItemName;ItemVersion=$ItemVersion})
     }
 
-    if (($MarketPlaceItemsWithUpdates.Count -1) -eq 0)
+    foreach ($DownloadedMarketPlaceItemVersion in $DownloadedMarketPlaceItemVersions)
+    {
+        $Objects = $DownloadedMarketPlaceItemVersions | Where-Object {$_.ItemName -match $DownloadedMarketPlaceItemVersion.ItemName}
+        if ($Objects.Count -gt 1)
+        {
+            $DownloadedMarketPlaceItemLatestVersions += $Objects | Sort-Object -Property ItemVersion -Descending | Select-Object -First 1
+        }
+        else 
+        {
+            $DownloadedMarketPlaceItemLatestVersions += $DownloadedMarketPlaceItemVersion
+        }
+
+    }
+
+    $AvailableUpdates = @()
+    $AvailableUpdates += New-Object PSObject -Property ([ordered]@{AvailableMarketPlaceItemName='ALL';AvailableMarketPlaceItemVersion=''})
+
+    foreach ($DownloadedMarketPlaceItemLatestVersion in $DownloadedMarketPlaceItemLatestVersions)
+    {
+        $AvailableVersion = $AvailableMarketPlaceItemsLatestVersions | Where-Object {$_.AvailableMarketPlaceItemName -eq $DownloadedMarketPlaceItemLatestVersion.ItemName}
+        if ($AvailableVersion.AvailableMarketPlaceItemVersion -gt $DownloadedMarketPlaceItemLatestVersion.ItemVersion)
+        {
+            $AvailableUpdates += $AvailableVersion
+        }
+    }
+    
+    if ($AvailableUpdates.Count -gt 1)
+    {
+        $AvailableUpdates = $AvailableUpdates | Sort-Object -Property AvailableMarketPlaceItemName -Unique
+        Write-Host "You have $($AvailableUpdates.Count -1) update(s) available" -ForegroundColor Yellow
+
+        #region Update Items
+        $ItemsToUpdate = $AvailableUpdates | Out-GridView -Title "Please Select which Marketplace items you want to update" -PassThru
+
+        if ($ItemsToUpdate.AvailableMarketPlaceItemName -eq 'All')
+        {
+            foreach ($ItemToUpdate in $AvailableUpdates | Where-Object {$_.AvailableMarketPlaceItemName -ne 'All'})
+            {
+                Write-Host "Downloading $($ItemToUpdate.AvailableMarketPlaceItemName) version $($ItemToUpdate.AvailableMarketPlaceItemVersion)" -ForegroundColor Green
+                Invoke-AzsAzureBridgeProductDownload -ActivationName $($BridgeActivation.Name) -Name $($ItemToUpdate.AvailableMarketPlaceItemName + $ItemToUpdate.AvailableMarketPlaceItemVersion.ToString()) -ResourceGroupName $ActivationResourceGroup -Force -AsJob -Confirm:$false -Verbose -WarningAction SilentlyContinue
+            }
+        }
+        else 
+        {
+            foreach ($ItemToUpdate in $ItemsToUpdate)
+            {
+                Write-Host "Downloading $($ItemToUpdate.AvailableMarketPlaceItemName) version $($ItemToUpdate.AvailableMarketPlaceItemVersion)" -ForegroundColor Green
+                Invoke-AzsAzureBridgeProductDownload -ActivationName $($BridgeActivation.Name) -Name $($ItemToUpdate.AvailableMarketPlaceItemName + $ItemToUpdate.AvailableMarketPlaceItemVersion.ToString()) -ResourceGroupName $ActivationResourceGroup -AsJob -Force -Confirm:$false -Verbose -WarningAction SilentlyContinue
+            }
+        }
+        #endregion
+    }
+    if ($AvailableUpdates.Count -le 1)
     {
         Write-Host "You have no outdated Marketplace items. Nice work keeping it up to date!" -ForegroundColor Green
     }
     #endregion    
 
-    #region Update Items
-    $ItemsToUpdate = $MarketPlaceItemsWithUpdates | Out-GridView -Title "Please Select which Marketplace items you want to update" -PassThru
 
-    $Progress = 0
-    if ($ItemsToUpdate.UpdateName -eq 'All')
-    {
-        Write-Host "You have selected $($MarketPlaceItemsWithUpdates.Count -1) updates to download"
-        foreach ($MarketPlaceItemToUpdate in $MarketPlaceItemsWithUpdates | Where-Object {$_.UpdateName -ne 'All'})
-        {
-            $Progress++
-            Write-Host "Downloading $($MarketPlaceItemToUpdate.UpdateName) version $($MarketPlaceItemToUpdate.UpdateVersion)"
-            Write-Progress -Activity "Downloading $($MarketPlaceItemToUpdate.UpdateName) version $($MarketPlaceItemToUpdate.UpdateVersion)" -Status "Progress:" -PercentComplete ($Progress/$($MarketPlaceItemsWithUpdates.Count)*100)
-            Invoke-AzsAzureBridgeProductDownload -ActivationName $($BridgeActivation.Name) -Name $($MarketPlaceItemToUpdate.UpdateName + '-' + $MarketPlaceItemToUpdate.UpdateVersion) -ResourceGroupName $ActivationResourceGroup -Force -AsJob -Confirm:$false -Verbose -WarningAction SilentlyContinue
-        }
-    }
-    else 
-    {
-        foreach ($ItemToUpdate in $ItemsToUpdate)
-        {
-            $Progress++
-            Write-Host "Downloading $($ItemToUpdate.UpdateName) version $($ItemToUpdate.UpdateVersion)"
-            Write-Progress -Activity "Downloading $($ItemToUpdate.UpdateName) version $($ItemToUpdate.UpdateVersion)" -Status "Progress:" -PercentComplete ($Progress/$($ItemsToUpdate.UpdateName.count)*100)
-            Invoke-AzsAzureBridgeProductDownload -ActivationName $($BridgeActivation.Name) -Name $($ItemToUpdate.UpdateName + '-' + $ItemToUpdate.UpdateVersion) -ResourceGroupName $ActivationResourceGroup -AsJob -Force -Confirm:$false -Verbose -WarningAction SilentlyContinue
-        }
-    }
-    #endregion
 }
 Export-ModuleMember -Function Invoke-MarketPlaceItemsUpdate
 

@@ -96,6 +96,7 @@ catch
 
 $Session = New-PSSession -ComputerName (Get-Random -InputObject $PrivilegedEndpoints) -ConfigurationName PrivilegedEndpoint -Credential $CloudAdminCredential
 
-[XML]$Status = Invoke-Command $Session {Get-AzureStackUpdateStatus}
+$Logs = Invoke-Command $Session {Get-AzureStackUpdateVerboseLog}
 
-$Status.SelectNodes("//Step") | Select Name,Description,Status | Format-Table -Wrap -AutoSize
+$Logs | Out-File -FilePath $env:TEMP\updatelogs.txt -Force
+Notepad.exe $env:TEMP\updatelogs.txt

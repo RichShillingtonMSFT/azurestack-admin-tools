@@ -11,6 +11,10 @@
     You will be prompted for a username and password for the new account.
     After the account is created, the credentials will be added to the Admin Key Vault.
 
+.PARAMETER CloudAdminUserName
+    Provide the User Name of the Cloud Admin.
+    Example: 'CloudAdmin@azurestack.local'
+
 .PARAMETER AdminKeyVaultName
     Provide the name of the Admin Key Vault where the CloudAdmin Credentials are stored.
     Example: 'Admin-KeyVault'
@@ -29,6 +33,11 @@
 [CmdletBinding()]
 Param
 (
+    # Provide the User Name of the Cloud Admin.
+    # Example: 'CloudAdmin@azurestack.local'
+    [parameter(Mandatory=$false,HelpMessage='Provide the User Name of the Cloud Admin.')]
+    [String]$CloudAdminUserName = 'CloudAdmin@azurestack.local',
+    
     # Provide the name of the Admin Key Vault where the CloudAdmin Credentials are stored.
     # Example: 'Admin-KeyVault'
     [parameter(Mandatory=$false,HelpMessage='Provide the name of the Admin Key Vault where the CloudAdmin Credentials are stored.')]

@@ -4,12 +4,15 @@
 
 .DESCRIPTION
     This script is used to create a new Cloud Admin Account.
-    The current Cloud Admin password is retrieved from a Key Vault Secret.
+    The current Cloud Admin Password is retrieved from a Key Vault Secret.
     The script will prompt you to login in with your Azure Stack Operator Credentials.
     You must then select the Subscription where the Admin Key Vault is stored.
     Example: Default Provider Subscription
-    You will be prompted for a username and password for the new account.
-    After the account is created, the credentials will be added to the Admin Key Vault.
+    You will be prompted to enter a username and password for the new Cloud Admin Account.
+
+.PARAMETER CloudAdminUserName
+    Provide the User Name of the Cloud Admin.
+    Example: 'CloudAdmin@azurestack.local'
 
 .PARAMETER AdminKeyVaultName
     Provide the name of the Admin Key Vault where the CloudAdmin Credentials are stored.
@@ -29,6 +32,11 @@
 [CmdletBinding()]
 Param
 (
+    # Provide the User Name of the Cloud Admin.
+    # Example: 'CloudAdmin@azurestack.local'
+    [parameter(Mandatory=$true,HelpMessage='Provide the User Name of the Cloud Admin.')]
+    [String]$CloudAdminUserName,
+
     # Provide the name of the Admin Key Vault where the CloudAdmin Credentials are stored.
     # Example: 'Admin-KeyVault'
     [parameter(Mandatory=$false,HelpMessage='Provide the name of the Admin Key Vault where the CloudAdmin Credentials are stored.')]
@@ -87,12 +95,13 @@ catch
     break
 }
 
-$NewCloudAdminCredentials = Get-Credential -Message 'Please provide the Username & Password for the new Cloud Admin Account'
+$NewCloudAdminCredentials = Get-Credential -Message "Please enter the Username and Password for the new Cloud Admin Account"
 
-Invoke-Command -ConfigurationName PrivilegedEndpoint `
-    -ComputerName (Get-Random -InputObject $PrivilegedEndpoints) `
-    -ScriptBlock { New-CloudAdminUser -UserName $Using:NewCloudAdminCredentials.UserName  -Password $Using:NewCloudAdminCredentials.Password }  `
-    -Credential  $CloudAdminCredential
+$Session = New-PSSession -ComputerName (Get-Random -InputObject $PrivilegedEndpoints) -ConfigurationName PrivilegedEndpoint -Credential $CloudAdminCredential
 
-$KeyVault = Get-AzureRmKeyVault -VaultName $AdminKeyVaultName
-Set-AzureKeyVaultSecret -VaultName $KeyVault.VaultName -Name $($NewCloudAdminCredentials.UserName) -SecretValue $NewCloudAdminCredentials.Password
+Invoke-Command -Session $session {New-CloudAdminUser -UserName $Using:NewCloudAdminCredentials.UserName -Password $Using:NewCloudAdminCredentials.Password}
+
+if ($Session)
+{
+    Remove-PSSession -Session $session
+}

@@ -78,5 +78,6 @@ if (!(Test-Path $REQOutputDirectory))
     New-Item -ItemType Directory -Path $REQOutputDirectory -Force
 }
 
-# Generate certificate signing requests for deployment:
-New-AzsHubDeploymentCertificateSigningRequest -RegionName $RegionName -FQDN $ExternalFQDN -subject $Subject -OutputRequestPath $REQOutputDirectory -IdentitySystem $IdentitySystem
+# Generate certificate requests for other Azure Stack Hub services, change the value for -CertificateType
+# DBAdapter
+New-AzsHubDbAdapterCertificateSigningRequest -RegionName $RegionName -FQDN $ExternalFQDN -subject $Subject -OutputRequestPath $REQOutputDirectory

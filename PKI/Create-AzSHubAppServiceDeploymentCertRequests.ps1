@@ -75,8 +75,6 @@ if (!($REQOutputDirectory))
     $REQOutputDirectory = "$ENV:USERPROFILE\Documents\AzureStackCSR\CER"
 }
 
-$Subject = "C=US,ST=Connecticut,L=Avon,O=Shillington,OU=Azure Stack Hub"
-
 if (!(Test-Path $REQOutputDirectory))
 {
     New-Item -ItemType Directory -Path $REQOutputDirectory -Force
@@ -85,12 +83,3 @@ if (!(Test-Path $REQOutputDirectory))
 # Generate certificate requests for other Azure Stack Hub services, change the value for -CertificateType
 # App Services
 New-AzsHubAppServicesCertificateSigningRequest -RegionName $RegionName -FQDN $ExternalFQDN -subject $Subject -OutputRequestPath $REQOutputDirectory
-
-# DBAdapter
-New-AzsHubDbAdapterCertificateSigningRequest -RegionName $RegionName -FQDN $ExternalFQDN -subject $Subject -OutputRequestPath $REQOutputDirectory
-
-# EventHubs
-New-AzsHubEventHubsCertificateSigningRequest -RegionName $RegionName -FQDN $ExternalFQDN -subject $Subject -OutputRequestPath $REQOutputDirectory
-
-# IoTHub
-New-AzsHubIoTHubCertificateSigningRequest -RegionName $RegionName -FQDN $ExternalFQDN -subject $Subject -OutputRequestPath $REQOutputDirectory

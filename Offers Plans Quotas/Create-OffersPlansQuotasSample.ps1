@@ -15,13 +15,13 @@ Param
 )
 
 # Enviornment Selection
-$Environments = Get-AzureRmEnvironment
+$Environments = Get-AzEnvironment
 $Environment = $Environments | Out-GridView -Title "Please Select the Azure Stack Admin Enviornment." -PassThru
 
 #region Connect to Azure
 try
 {
-    Connect-AzureRmAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
+    Connect-AzAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
 }
 catch
 {
@@ -31,11 +31,10 @@ catch
 
 try 
 {
-    $Subscriptions = Get-AzureRmSubscription
+    $Subscriptions = Get-AzSubscription
     if ($Subscriptions.Count -gt '1')
     {
         $Subscription = $Subscriptions | Out-GridView -Title "Please Select the Default Provider Subscription." -PassThru
-        Select-AzureRmSubscription $Subscription
     }
 }
 catch
@@ -44,13 +43,13 @@ catch
     break
 }
 
-$Location = Get-AzureRmLocation
+$Location = Get-AzLocation
 #endregion
 
-$ResourceGroup = Get-AzureRMResourceGroup -Name $ResourceGroupName -ErrorAction SilentlyContinue
+$ResourceGroup = Get-AzResourceGroup -Name $ResourceGroupName -ErrorAction SilentlyContinue
 if (!$ResourceGroup)
 {
-    New-AzureRMResourceGroup -Name $ResourceGroupName -Location $Location.Location
+    New-AzResourceGroup -Name $ResourceGroupName -Location $Location.Location
 }
 
 #region Standard IaaS Plan

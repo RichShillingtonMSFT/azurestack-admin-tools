@@ -32,15 +32,14 @@ Param
 
 $CloudAdminCredential = Get-Credential -Credential $CloudAdminUserName
 
-#region Enviornment Selection
-$Environments = Get-AzureRmEnvironment
+#region Connect To Azure
+# Enviornment Selection
+$Environments = Get-AzEnvironment
 $Environment = $Environments | Out-GridView -Title "Please Select an Azure Enviornment." -PassThru
-#endregion
 
-#region Connect to Azure
 try
 {
-    Add-AzureRmAccount -EnvironmentName $($Environment.Name) -ErrorAction 'Stop'
+    $AzAccount = Connect-AzAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
 }
 catch
 {
@@ -50,30 +49,34 @@ catch
 
 try 
 {
-    $Subscriptions = Get-AzureRmSubscription
+    $Subscriptions = Get-AzSubscription
     if ($Subscriptions.Count -gt '1')
     {
         $Subscription = $Subscriptions | Out-GridView -Title "Please Select a Subscription." -PassThru
-        Select-AzureRmSubscription $Subscription
+        Set-AzContext $Subscription
+        $SubscriptionID = $Subscription.SubscriptionID
+        $TenantID = $Subscription.TenantId
     }
     else
     {
-        Select-AzureRmSubscription $Subscriptions
+        $SubscriptionID = $Subscriptions.SubscriptionID
+        $TenantID = $Subscriptions.TenantId
     }
-
-    $AzContext = Get-AzureRmContext
 }
 catch
 {
     Write-Error -Message $_.Exception
     break
 }
-#endregion
 
-#region Location Selection
-$Locations = Get-AzureRmLocation
+
+# Location Selection
+$Locations = Get-AzLocation
 $Location = ($Locations | Out-GridView -Title "Please Select a location." -PassThru).Location
 #endregion
+
+# Register Microsoft.AzureStack Resource Provider
+Register-AzResourceProvider -ProviderNamespace Microsoft.AzureStack
 
 #region Find Modules & import them
 $InstalledLocations = @()

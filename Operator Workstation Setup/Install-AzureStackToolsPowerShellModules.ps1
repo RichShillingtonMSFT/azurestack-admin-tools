@@ -187,16 +187,18 @@ elseif ($PowerShellGetAvailable.Version -eq $PowerShellGetInstalled.Version)
 
     If (($Version -ge '2002') -and ($AzModules -eq $true))
     {
+        [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+        
         # Install the AzureRM.BootStrapper module. Select Yes when prompted to install NuGet
         Write-Host "Installing the AzureRM.BootStrapper module. Select Yes if prompted to install NuGet"
-        Install-Module -Name Az.BootStrapper -AllowPrerelease -AllowClobber -Force -Verbose
+        Install-Module -Name Az.BootStrapper -Force
 
         # Install and import the API Version Profile required by Azure Stack into the current PowerShell session.
         Write-Host "Installing and importing the API Version Profile required by Azure Stack"
-        Use-AzProfile -Profile 2019-03-01-hybrid -Force -Verbose -ErrorAction SilentlyContinue
+        Install-AzProfile -Profile 2020-09-01-hybrid -Force
 
         Write-Host "Installing AzureStack Module"
-        Install-Module -Name AzureStack -RequiredVersion '2.0.2-preview' -AllowPrerelease -AllowClobber -Force -WarningAction SilentlyContinue -Verbose
+        Install-Module -Name AzureStack -RequiredVersion 2.1.1
     }
 
     If ($Version -eq '1910')

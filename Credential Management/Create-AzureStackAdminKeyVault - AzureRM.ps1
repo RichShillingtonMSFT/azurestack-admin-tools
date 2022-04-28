@@ -43,13 +43,13 @@ Param
 )
 
 # Enviornment Selection
-$Environments = Get-AzEnvironment
+$Environments = Get-AzureRmEnvironment
 $Environment = $Environments | Out-GridView -Title "Please Select the Azure Stack Admin Enviornment." -PassThru
 
 #region Connect to Azure
 try
 {
-    Connect-AzAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
+    Connect-AzureRmAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
 }
 catch
 {
@@ -59,11 +59,11 @@ catch
 
 try 
 {
-    $Subscriptions = Get-AzSubscription
+    $Subscriptions = Get-AzureRmSubscription
     if ($Subscriptions.Count -gt '1')
     {
-        $Subscription = $Subscriptions | Out-GridView -Title "Please Select a Subscription." -PassThru
-        Set-AzContext $Subscription
+        $Subscription = $Subscriptions | Out-GridView -Title "Please Select the Subscription where the Admin Key Vault will be created." -PassThru
+        Select-AzureRmSubscription $Subscription
     }
 }
 catch
@@ -75,20 +75,20 @@ catch
 
 $CloudAdminCredential = $host.ui.PromptForCredential("", 'Please provide the Cloud Admin Password to store in the Key Vault', "CloudAdmin", "")
 
-$Location = (Get-AzLocation).Location
+$Location = (Get-AzureRMLocation).Location
 
-if (!(Get-AzKeyVault -VaultName $AdminKeyVaultName))
+if (!(Get-AzureRmKeyVault -VaultName $AdminKeyVaultName))
 {
-    if (!(Get-AzResourceGroup $AdminKeyVaultResourceGroupName -ErrorAction SilentlyContinue))
+    if (!(Get-AzureRmResourceGroup $AdminKeyVaultResourceGroupName -ErrorAction SilentlyContinue))
     {
-        New-AzResourceGroup -Name $AdminKeyVaultResourceGroupName -Location $Location
+        New-AzureRmResourceGroup -Name $AdminKeyVaultResourceGroupName -Location $Location
     }
 
-    $KeyVault = New-AzKeyVault -VaultName $AdminKeyVaultName -ResourceGroupName $AdminKeyVaultResourceGroupName -Location $Location
+    $KeyVault = New-AzureRmKeyVault -VaultName $AdminKeyVaultName -ResourceGroupName $AdminKeyVaultResourceGroupName -Location $Location
 }
 else 
 {
-    $KeyVault = Get-AzKeyVault -VaultName $AdminKeyVaultName -ResourceGroupName $AdminKeyVaultResourceGroupName
+    $KeyVault = Get-AzureRmKeyVault -VaultName $AdminKeyVaultName -ResourceGroupName $AdminKeyVaultResourceGroupName
 }
 
 Set-AzureKeyVaultSecret -VaultName $KeyVault.VaultName -Name $CloudAdminSecretName -SecretValue $CloudAdminCredential.Password

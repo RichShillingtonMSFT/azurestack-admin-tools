@@ -1,13 +1,14 @@
-﻿<#
+<#
 .SYNOPSIS
-    Script to get Azure Stack Update Progess
+    Script to create a new Cloud Admin Account
 
 .DESCRIPTION
-    Use this to get Azure Stack Update Progess and display it in a readable window from Privileged Endpoint without entering the CloudAdmin User Password.
-    The Password is retrieved from a Key Vault Secret.
+    This script is used to create a new Cloud Admin Account.
+    The current Cloud Admin Password is retrieved from a Key Vault Secret.
     The script will prompt you to login in with your Azure Stack Operator Credentials.
     You must then select the Subscription where the Admin Key Vault is stored.
     Example: Default Provider Subscription
+    You will be prompted to enter a username and password for the new Cloud Admin Account.
 
 .PARAMETER CloudAdminUserName
     Provide the User Name of the Cloud Admin.
@@ -26,7 +27,7 @@
     Example: @('10.0.0.1','10.0.0.2','10.0.0.3')
 
 .EXAMPLE
-    .\Get-AzureStackUpdateProgress.ps1
+    .\New-CloudAdminAccount.ps1
 #>
 [CmdletBinding()]
 Param
@@ -34,7 +35,7 @@ Param
     # Provide the User Name of the Cloud Admin.
     # Example: 'CloudAdmin@azurestack.local'
     [parameter(Mandatory=$false,HelpMessage='Provide the User Name of the Cloud Admin.')]
-    [String]$CloudAdminUserName = 'CloudAdmin@Azurestack.local',
+    [String]$CloudAdminUserName,
 
     # Provide the name of the Admin Key Vault where the CloudAdmin Credentials are stored.
     # Example: 'Admin-KeyVault'
@@ -49,17 +50,17 @@ Param
     # Define list of Privileged Endpoints as an Array.
     # Example: @("10.0.0.1","10.0.0.2","10.0.0.3")
     [parameter(Mandatory=$false,HelpMessage='Define list of Privileged Endpoints as an Array. Example: @("10.0.0.1","10.0.0.2","10.0.0.3")')]
-    [Array]$PrivilegedEndpoints = @('10.0.0.1','10.0.0.2','10.0.0.3')
+    [Array]$PrivilegedEndpoints = @("10.0.0.1","10.0.0.2","10.0.0.3")
 )
 
 # Enviornment Selection
-$Environments = Get-AzEnvironment
+$Environments = Get-AzureRmEnvironment
 $Environment = $Environments | Out-GridView -Title "Please Select the Azure Stack Admin Enviornment." -PassThru
 
 #region Connect to Azure
 try
 {
-    Connect-AzAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
+    Connect-AzureRmAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
 }
 catch
 {
@@ -69,11 +70,11 @@ catch
 
 try 
 {
-    $Subscriptions = Get-AzSubscription
+    $Subscriptions = Get-AzureRmSubscription
     if ($Subscriptions.Count -gt '1')
     {
         $Subscription = $Subscriptions | Out-GridView -Title "Please Select the Subscription where the Admin Key Vault is located." -PassThru
-        Set-AzContext $Subscription
+        Select-AzureRmSubscription $Subscription
     }
 }
 catch
@@ -94,9 +95,13 @@ catch
     break
 }
 
+$NewCloudAdminCredentials = Get-Credential -Message "Please enter the Username and Password for the new Cloud Admin Account"
+
 $Session = New-PSSession -ComputerName (Get-Random -InputObject $PrivilegedEndpoints) -ConfigurationName PrivilegedEndpoint -Credential $CloudAdminCredential
 
-$Logs = Invoke-Command $Session {Get-AzureStackUpdateVerboseLog}
+Invoke-Command -Session $session {New-CloudAdminUser -UserName $Using:NewCloudAdminCredentials.UserName -Password $Using:NewCloudAdminCredentials.Password}
 
-$Logs | Out-File -FilePath $env:TEMP\updatelogs.txt -Force
-Notepad.exe $env:TEMP\updatelogs.txt
+if ($Session)
+{
+    Remove-PSSession -Session $session
+}

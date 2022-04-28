@@ -55,13 +55,13 @@ Param
 )
 
 # Enviornment Selection
-$Environments = Get-AzureRmEnvironment
+$Environments = Get-AzEnvironment
 $Environment = $Environments | Out-GridView -Title "Please Select the Azure Stack Admin Enviornment." -PassThru
 
 #region Connect to Azure
 try
 {
-    Connect-AzureRmAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
+    Connect-AzAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
 }
 catch
 {
@@ -71,11 +71,11 @@ catch
 
 try 
 {
-    $Subscriptions = Get-AzureRmSubscription
+    $Subscriptions = Get-AzSubscription
     if ($Subscriptions.Count -gt '1')
     {
-        $Subscription = $Subscriptions | Out-GridView -Title "Please Select the Subscription where the Admin Key Vault is located." -PassThru
-        Select-AzureRmSubscription $Subscription
+        $Subscription = $Subscriptions | Out-GridView -Title "Please Select a Subscription." -PassThru
+        Set-AzContext $Subscription
     }
 }
 catch
@@ -103,5 +103,5 @@ Invoke-Command -ConfigurationName PrivilegedEndpoint `
     -ScriptBlock { New-CloudAdminUser -UserName $Using:NewCloudAdminCredentials.UserName  -Password $Using:NewCloudAdminCredentials.Password }  `
     -Credential  $CloudAdminCredential
 
-$KeyVault = Get-AzureRmKeyVault -VaultName $AdminKeyVaultName
+$KeyVault = Get-AzKeyVault -VaultName $AdminKeyVaultName
 Set-AzureKeyVaultSecret -VaultName $KeyVault.VaultName -Name $($NewCloudAdminCredentials.UserName) -SecretValue $NewCloudAdminCredentials.Password

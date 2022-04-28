@@ -34,7 +34,8 @@ try
     $Subscriptions = Get-AzSubscription
     if ($Subscriptions.Count -gt '1')
     {
-        $Subscription = $Subscriptions | Out-GridView -Title "Please Select the Default Provider Subscription." -PassThru
+        $Subscription = $Subscriptions | Out-GridView -Title "Please Select a Subscription." -PassThru
+        Set-AzContext $Subscription
     }
 }
 catch

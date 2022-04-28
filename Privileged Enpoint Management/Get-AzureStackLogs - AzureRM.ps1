@@ -1,13 +1,22 @@
-﻿<#
+<#
 .SYNOPSIS
-    Script to get Azure Stack Update Progess
+    Script to connect to the Privileged Endpoint and Get Logs
 
 .DESCRIPTION
-    Use this to get Azure Stack Update Progess and display it in a readable window from Privileged Endpoint without entering the CloudAdmin User Password.
+    This script is used to connect to a Privileged Endpoint without entering the CloudAdmin User Password.
     The Password is retrieved from a Key Vault Secret.
     The script will prompt you to login in with your Azure Stack Operator Credentials.
     You must then select the Subscription where the Admin Key Vault is stored.
     Example: Default Provider Subscription
+    You will then need to enter a Username & Password for UNC Share connection.
+
+.PARAMETER HoursAgo
+    How many hours back would you like to go.
+    Example: '8'
+
+.PARAMETER LogFilePath
+    Provide the UNC Path for the logs.
+    Example: '\\server1\logs'
 
 .PARAMETER CloudAdminUserName
     Provide the User Name of the Cloud Admin.
@@ -26,15 +35,25 @@
     Example: @('10.0.0.1','10.0.0.2','10.0.0.3')
 
 .EXAMPLE
-    .\Get-AzureStackUpdateProgress.ps1
+    .\Get-AzureStackLogs.ps1 -LogFilePath '\\Server1\Logs' -HoursAgo '8'
 #>
 [CmdletBinding()]
 Param
 (
+    # How many hours back would you like to go.
+    # Example: '8'
+    [parameter(Mandatory=$true,HelpMessage='How many hours back would you like to go?')]
+    [Int]$HoursAgo,
+
+    # Provide the UNC Path for the logs.
+    # Example: '\\server1\logs'
+    [parameter(Mandatory=$true,HelpMessage='Provide the UNC Path for the logs.')]
+    [String]$LogFilePath,
+    
     # Provide the User Name of the Cloud Admin.
     # Example: 'CloudAdmin@azurestack.local'
     [parameter(Mandatory=$false,HelpMessage='Provide the User Name of the Cloud Admin.')]
-    [String]$CloudAdminUserName = 'CloudAdmin@Azurestack.local',
+    [String]$CloudAdminUserName = 'CloudAdmin@AzureStack.local',
 
     # Provide the name of the Admin Key Vault where the CloudAdmin Credentials are stored.
     # Example: 'Admin-KeyVault'
@@ -49,17 +68,17 @@ Param
     # Define list of Privileged Endpoints as an Array.
     # Example: @("10.0.0.1","10.0.0.2","10.0.0.3")
     [parameter(Mandatory=$false,HelpMessage='Define list of Privileged Endpoints as an Array. Example: @("10.0.0.1","10.0.0.2","10.0.0.3")')]
-    [Array]$PrivilegedEndpoints = @('10.0.0.1','10.0.0.2','10.0.0.3')
+    [Array]$PrivilegedEndpoints = @("10.0.0.1","10.0.0.2","10.0.0.3")
 )
 
 # Enviornment Selection
-$Environments = Get-AzEnvironment
+$Environments = Get-AzureRmEnvironment
 $Environment = $Environments | Out-GridView -Title "Please Select the Azure Stack Admin Enviornment." -PassThru
 
 #region Connect to Azure
 try
 {
-    Connect-AzAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
+    Connect-AzureRmAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
 }
 catch
 {
@@ -69,11 +88,11 @@ catch
 
 try 
 {
-    $Subscriptions = Get-AzSubscription
+    $Subscriptions = Get-AzureRmSubscription
     if ($Subscriptions.Count -gt '1')
     {
         $Subscription = $Subscriptions | Out-GridView -Title "Please Select the Subscription where the Admin Key Vault is located." -PassThru
-        Set-AzContext $Subscription
+        Select-AzureRmSubscription $Subscription
     }
 }
 catch
@@ -94,9 +113,16 @@ catch
     break
 }
 
+$ShareCredentials = Get-Credential -Message "Please enter the Username and Password to connect to the UNC Path"
+
+$FromDate = (Get-Date).AddHours(-$HoursAgo)
+$ToDate = (Get-Date)
+
 $Session = New-PSSession -ComputerName (Get-Random -InputObject $PrivilegedEndpoints) -ConfigurationName PrivilegedEndpoint -Credential $CloudAdminCredential
 
-$Logs = Invoke-Command $Session {Get-AzureStackUpdateVerboseLog}
+Invoke-Command -Session $session {Get-AzureStackLog -OutputSharePath $Using:LogFilePath -OutputShareCredential $Using:ShareCredentials -FilterByRole Storage -FromDate $Using:FromDate -ToDate $Using:ToDate}
 
-$Logs | Out-File -FilePath $env:TEMP\updatelogs.txt -Force
-Notepad.exe $env:TEMP\updatelogs.txt
+if ($Session)
+{
+    Remove-PSSession -Session $session
+}

@@ -72,13 +72,13 @@ Param
 )
 
 # Enviornment Selection
-$Environments = Get-AzureRmEnvironment
+$Environments = Get-AzEnvironment
 $Environment = $Environments | Out-GridView -Title "Please Select the Azure Stack Admin Enviornment." -PassThru
 
 #region Connect to Azure
 try
 {
-    Connect-AzureRmAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
+    Connect-AzAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
 }
 catch
 {
@@ -88,11 +88,11 @@ catch
 
 try 
 {
-    $Subscriptions = Get-AzureRmSubscription
+    $Subscriptions = Get-AzSubscription
     if ($Subscriptions.Count -gt '1')
     {
         $Subscription = $Subscriptions | Out-GridView -Title "Please Select the Subscription where the Admin Key Vault is located." -PassThru
-        Select-AzureRmSubscription $Subscription
+        Set-AzContext $Subscription
     }
 }
 catch

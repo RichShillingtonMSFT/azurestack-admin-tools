@@ -52,14 +52,14 @@ Param
 $CloudAdminCredential = Get-Credential -Credential $CloudAdminUserName
 
 #region Enviornment Selection
-$Environments = Get-AzEnvironment
+$Environments = Get-AzureRmEnvironment
 $Environment = $Environments | Out-GridView -Title "Please Select an Azure Enviornment." -PassThru
 #endregion
 
 #region Connect to Azure
 try
 {
-    Connect-AzAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
+    Add-AzureRmAccount -EnvironmentName $($Environment.Name) -ErrorAction 'Stop'
 }
 catch
 {
@@ -69,21 +69,24 @@ catch
 
 try 
 {
-    $Subscriptions = Get-AzSubscription
+    $Subscriptions = Get-AzureRmSubscription
     if ($Subscriptions.Count -gt '1')
     {
         $Subscription = $Subscriptions | Out-GridView -Title "Please Select a Subscription." -PassThru
-        Set-AzContext $Subscription
+        Select-AzureRmSubscription $Subscription
     }
+    else
+    {
+        Select-AzureRmSubscription $Subscriptions
+    }
+
+    $AzContext = Get-AzureRmContext
 }
 catch
 {
     Write-Error -Message $_.Exception
     break
 }
-
-$AzContext = Get-AzContext
-
 #endregion
 
 $InstalledLocations = @()

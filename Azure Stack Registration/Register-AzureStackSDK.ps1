@@ -39,7 +39,7 @@ $Environment = $Environments | Out-GridView -Title "Please Select an Azure Envio
 
 try
 {
-    $AzAccount = Connect-AzAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
+    Connect-AzAccount -Environment $($Environment.Name) -ErrorAction 'Stop'
 }
 catch
 {
@@ -54,13 +54,6 @@ try
     {
         $Subscription = $Subscriptions | Out-GridView -Title "Please Select a Subscription." -PassThru
         Set-AzContext $Subscription
-        $SubscriptionID = $Subscription.SubscriptionID
-        $TenantID = $Subscription.TenantId
-    }
-    else
-    {
-        $SubscriptionID = $Subscriptions.SubscriptionID
-        $TenantID = $Subscriptions.TenantId
     }
 }
 catch
@@ -68,7 +61,6 @@ catch
     Write-Error -Message $_.Exception
     break
 }
-
 
 # Location Selection
 $Locations = Get-AzLocation

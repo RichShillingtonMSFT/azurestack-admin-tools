@@ -9,26 +9,26 @@
 
 .PARAMETER CERPath
     Provide the directory containing the CER Files.
-    Example: "$ENV:USERPROFILE\Documents\AzureStackCSR\CER"
+    Example: "$ENV:USERPROFILE\Documents\AzureStack\CER"
 
 .PARAMETER PFXExportPath
     Provide the output directory for the PFX Files.
-    Example: "$ENV:USERPROFILE\Documents\AzureStackCSR\PFX"
+    Example: "$ENV:USERPROFILE\Documents\AzureStack\PFX"
 
 .EXAMPLE
-    .\Prepare-AzSHubCertificates.ps1 -CERPath "$ENV:USERPROFILE\Documents\AzureStackCSR\CER" `
-        -PFXExportPath "$ENV:USERPROFILE\Documents\AzureStackCSR\PFX"
+    .\Prepare-AzSHubCertificates.ps1 -CERPath "$ENV:USERPROFILE\Documents\AzureStack\CER" `
+        -PFXExportPath "$ENV:USERPROFILE\Documents\AzureStack\PFX"
 #>
 [CmdletBinding()]
 Param
 (
     # Provide the directory containing the CER Files.
-    # Example: "$ENV:USERPROFILE\Documents\AzureStackCSR\CER"
+    # Example: "$ENV:USERPROFILE\Documents\AzureStack\CER"
     [parameter(Mandatory=$true,HelpMessage='Provide the directory containing the CER Files.')]
     [String]$CERPath,
 
     # Provide the output directory for the PFX Files.
-    # Example: "$ENV:USERPROFILE\Documents\AzureStackCSR\PFX"
+    # Example: "$ENV:USERPROFILE\Documents\AzureStack\PFX"
     [parameter(Mandatory=$false,HelpMessage='Provide the output directory for the PFX Files.')]
     [String]$PFXExportPath
 )
@@ -38,7 +38,7 @@ Import-Module Microsoft.AzureStack.ReadinessChecker
 
 if (!($PFXExportPath))
 {
-    $PFXExportPath = "$env:USERPROFILE\Documents\AzureStackPFX"
+    $PFXExportPath = "$env:USERPROFILE\Documents\AzureStack\PFX"
 }
 
 $PFXPassword = Read-Host -AsSecureString -Prompt "PFX Password"

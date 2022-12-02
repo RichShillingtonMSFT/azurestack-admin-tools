@@ -70,7 +70,7 @@ Param
 
 if (!($REQOutputDirectory))
 {
-    $REQOutputDirectory = "$ENV:USERPROFILE\Documents\AzureStackCSR\CER"
+    $REQOutputDirectory = "$ENV:USERPROFILE\Documents\AzureStack\REQ"
 }
 
 if (!(Test-Path $REQOutputDirectory))

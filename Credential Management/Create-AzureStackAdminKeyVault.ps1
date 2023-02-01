@@ -91,4 +91,4 @@ else
     $KeyVault = Get-AzKeyVault -VaultName $AdminKeyVaultName -ResourceGroupName $AdminKeyVaultResourceGroupName
 }
 
-Set-AzureKeyVaultSecret -VaultName $KeyVault.VaultName -Name $CloudAdminSecretName -SecretValue $CloudAdminCredential.Password
+Set-AzKeyVaultSecret -VaultName $KeyVault.VaultName -Name $CloudAdminSecretName -SecretValue $CloudAdminCredential.Password

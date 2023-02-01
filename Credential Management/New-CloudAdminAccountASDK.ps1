@@ -87,7 +87,7 @@ catch
 
 try
 {
-    $Secret = Get-AzureKeyVaultSecret -VaultName $AdminKeyVaultName -Name $CloudAdminSecretName -ErrorAction Stop
+    $Secret = Get-AzKeyVaultSecret -VaultName $AdminKeyVaultName -Name $CloudAdminSecretName -ErrorAction Stop
     $CloudAdminCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $CloudAdminUserName, $Secret.SecretValue -ErrorAction Stop
 }
 catch
@@ -104,4 +104,4 @@ Invoke-Command -ConfigurationName PrivilegedEndpoint `
     -Credential  $CloudAdminCredential
 
 $KeyVault = Get-AzKeyVault -VaultName $AdminKeyVaultName
-Set-AzureKeyVaultSecret -VaultName $KeyVault.VaultName -Name $($NewCloudAdminCredentials.UserName) -SecretValue $NewCloudAdminCredentials.Password
+Set-AzKeyVaultSecret -VaultName $KeyVault.VaultName -Name $($NewCloudAdminCredentials.UserName) -SecretValue $NewCloudAdminCredentials.Password

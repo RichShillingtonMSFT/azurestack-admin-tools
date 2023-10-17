@@ -1,0 +1,40 @@
+{
+    "mode": "All",
+    "parameters": {
+      "prefix" : {
+        "type" : "string",
+        "metadata" : {
+          "description" : "Provide the required prefix. This can include a wildcard. Example: Dev-*"
+        }
+      }
+    },
+    "policyRule": {
+      "if": {
+        "allOf": [
+          {
+            "field": "name",
+            "notLike": "[parameters('prefix')]"
+          },
+          {
+            "anyOf" : [
+              {
+                "field": "type",
+                "equals": "Microsoft.KeyVault/vaults"
+              },
+              {
+                "field": "type",
+                "equals": "Microsoft.Storage/storageAccounts"
+              },
+              {
+                "field": "type",
+                "equals": "Microsoft.Compute/virtualMachines"
+              }
+            ]
+          }
+        ]
+      },
+      "then": {
+        "effect": "deny"
+      }
+    }
+}

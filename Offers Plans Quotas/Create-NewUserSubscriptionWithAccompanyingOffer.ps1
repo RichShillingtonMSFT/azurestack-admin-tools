@@ -280,7 +280,15 @@ Process
     #region Create Resource Group & Storage Account for Activity Logs
     $DiagnosticsResourceGroupName = $($NewSubscription.Name).replace(' ','') + '-activitylogs-rg'
     $DiagnosticsResourceGroup = New-AzResourceGroup -Name $DiagnosticsResourceGroupName -location $Location.Location
-    $DiagnosticsStorageAccountName = $(($NewSubscription.Name).ToLower().replace(' ','')).Substring(0, 12) + 'activitylog'
+    if (($NewSubscription.Name).Length -lt 12)
+    {
+        $Substring = ($NewSubscription.Name).Length
+    }
+    if (($NewSubscription.Name).Length -ge 12)
+    {
+        $Substring = 12
+    }
+    $DiagnosticsStorageAccountName = $(($NewSubscription.Name).ToLower().replace(' ','')).Substring(0, $Substring) + 'activitylog'
     $DiagnosticsStorageAccount = New-AzStorageAccount -ResourceGroupName $DiagnosticsResourceGroup.ResourceGroupName -Name $DiagnosticsStorageAccountName -SkuName Standard_LRS -Location $Location.Location -EnableHttpsTrafficOnly:$true
     #endregion
 
@@ -290,7 +298,7 @@ Process
         "name": "activitylogs",
         "properties": {
             "metrics": [],
-            "storageAccountId": "$($DiagnosticsStorageAccount.Id)"            
+            "storageAccountId": "$($DiagnosticsStorageAccount.Id)",        
             "logs": [
                 {
                     "category": "Administrative",
@@ -356,7 +364,7 @@ Process
                         "enabled": false
                     }
                 }
-            ],
+            ]
         }
     }
 "@

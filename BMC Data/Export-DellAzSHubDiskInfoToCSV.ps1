@@ -1,9 +1,9 @@
 <#
     .SYNOPSIS
-    Pulls Hard Drive information from the BMC of each Node in a given system and exports it to CSV
+    Pulls Hard Drive information from the Dell BMC of each Node in a given system and exports it to CSV
 
     .EXAMPLE
-    Export-AzSHubDiskInfoToCSV.ps1 -NumberOfNodes '4' -FirstBMCNodeIP '10.0.1.2'
+    Export-DellAzSHubDiskInfoToCSV.ps1 -NumberOfNodes '4' -FirstBMCNodeIP '10.0.1.2'
 
     .NOTES
     The script starts with the HLH and then proceeds through each of the nodes.

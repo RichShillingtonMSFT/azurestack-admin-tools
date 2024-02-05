@@ -98,4 +98,13 @@ $Session = New-PSSession -ComputerName (Get-Random -InputObject $PrivilegedEndpo
 
 [XML]$Status = Invoke-Command $Session {Get-AzureStackUpdateStatus}
 
-$Status.SelectNodes("//Step") | Select Name,Description,Status | Format-Table -Wrap -AutoSize
+$Status.SelectNodes("//Step") | Select-Object Name,Description,Status | Where-Object {($_.Status -ne 'Success') -and ($_.Status -ne 'Skipped')} | Format-Table -Wrap -AutoSize
+
+[Int]$TotalSteps = $($Status.SelectNodes("//Step")).Count
+
+Write-Host "Total Steps - $TotalSteps"
+Write-Host "Completed Successfully - $($($Status.SelectNodes("//Step") | Where-Object {$_.Status -eq 'Success'}).Count)" -ForegroundColor Green
+Write-Host "Skipped Steps - $($($Status.SelectNodes("//Step") | Where-Object {$_.Status -eq 'Skipped'}).Count)" -ForegroundColor Yellow
+Write-Host "Steps In Progress - $($($Status.SelectNodes("//Step") | Where-Object {$_.Status -eq 'InProgress'}).Count)" -ForegroundColor Green
+Write-Host "Steps with Errors - $($($Status.SelectNodes("//Step") | Where-Object {$_.Status -eq 'Error'}).Count)" -ForegroundColor Red
+Write-Host "Steps Remaining - $($($Status.SelectNodes("//Step") | Where-Object {$_.Status -eq $null}).Count)" -ForegroundColor Cyan

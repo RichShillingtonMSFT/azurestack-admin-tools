@@ -1,26 +1,31 @@
+$UpdateDownloadPath = 'C:\2311update'
 
-$UpdatePath = 'C:\Updates\AzS_Update_1.2102.31.152.zip'
-$XMLPath = 'C:\Updates\metadata.xml'
 Function Test-UpdateHash
 {
     [CmdletBinding()]
     Param
     (
-    [String]$UpdatePath,
-    [String]$XMLPath
+        [String]$UpdateDownloadPath
     )
     
-    [xml]$Hash = Get-Content $XMLPath
-    $UpdateHash = (Get-FileHash $UpdatePath).Hash
+    $UpdateFiles = Get-ChildItem -Path $UpdateDownloadPath
+    $XMLFile = ($UpdateFiles | Where-Object {$_.FullName -like "*.xml"}).FullName
+    $ZipFiles = $UpdateFiles | Where-Object {$_.FullName -like "*.zip"}
+    [xml]$HashList = Get-Content $XMLFile
 
-    If ($UpdateHash -eq $($Hash.UpdatePackageManifest.UpdateInfo.PackageHash))
+    foreach ($ZipFile in $ZipFiles)
     {
-        Write-Host "You're good to go!" -ForegroundColor Green
-    }
-    else
-    {
-        Write-Host "Your update is busted!" -ForegroundColor Red
+        Write-Host "Checking Update File $($ZipFile.Name)" -ForegroundColor Cyan
+
+        if ($($HashList.UpdatePackageManifest.UpdateInfo.PackageHash) -contains $((Get-FileHash $ZipFile.Fullname).Hash))
+        {
+            Write-Host "Update File $($ZipFile.Name) is valid" -ForegroundColor Green
+        }
+        else
+        {
+            Write-Host "Update File $($ZipFile.Name) is NOT valid" -ForegroundColor Red
+        }
     }
 }
 
-Test-UpdateHash -UpdatePath $UpdatePath -XMLPath $XMLPath
+Test-UpdateHash -UpdateDownloadPath $UpdateDownloadPath

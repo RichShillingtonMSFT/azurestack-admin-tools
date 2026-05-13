@@ -25,7 +25,7 @@
 
 .PARAMETER PrivilegedEndpointIPAddress
     # Provide the IP Address of the Privileged Endpoint.
-    # Example: '192.168.0.224' for the WM02 Privileged Endpoint, 10.255.80.224' for the WM03 Privileged Endpoint
+    # Example: IPs for the Privileged Endpoint can be found under Region Management > Properties in the Admin Portal or in the AzureStackStampInformation.json file.
 
 .EXAMPLE
     .\Integrate-AzureStackHubADFSWithYourAD.ps1 -StackHubRegionName 'HUB01' `
@@ -44,21 +44,21 @@ Param
 
     # Provide your Active Directory DNS Domain Name.
     # Example: 'Contoso.com'
-    [parameter(Mandatory=$false,HelpMessage='Provide your Active Directory DNS Domain Name. Example: Contoso.com')]
-    [String]$ADDomainDNSName = 'Contoso.com',
+    [parameter(Mandatory=$true,HelpMessage='Provide your Active Directory DNS Domain Name. Example: Contoso.com')]
+    [String]$ADDomainDNSName,
 
     # Provide the ADFS Metadata URL for your Primary ADFS Server.
     # Example: 'sts.azurestack.Contoso.com'
-    [parameter(Mandatory=$false,HelpMessage='Provide the ADFS Metadata URL for your Primary ADFS Server. Example: sts.azurestack.Contoso.com')]
-    [String]$ADFSMetadataURL = 'sts.azurestack.Contoso.com',
+    [parameter(Mandatory=$true,HelpMessage='Provide the ADFS Metadata URL for your Primary ADFS Server. Example: sts.azurestack.Contoso.com')]
+    [String]$ADFSMetadataURL,
 
     # Provide the Service Admin Owner UPN.
     # Example: 'ServiceAdmin@Contoso.com'
-    [parameter(Mandatory=$false,HelpMessage='Provide the Service Admin Owner UPN. Example: ServiceAdmin@Contoso.com')]
-    [String]$ServiceAdminOwnerUPN = 'ServiceAdmin@Contoso.com',
+    [parameter(Mandatory=$true,HelpMessage='Provide the Service Admin Owner UPN. Example: ServiceAdmin@Contoso.com')]
+    [String]$ServiceAdminOwnerUPN,
 
     # Provide the IP Address of the Privileged Endpoint.
-    # Example: '192.168.0.224' for the WM02 Privileged Endpoint, 10.255.80.224' for the WM03 Privileged Endpoint
+    # Example: IPs for the Privileged Endpoint can be found under Region Management > Properties in the Admin Portal or in the AzureStackStampInformation.json file.
     [parameter(Mandatory=$true,HelpMessage='Provide the IP Address of the Privileged Endpoint. Example: 192.168.0.224')]
     [String]$PrivilegedEndpointIPAddress
 )
